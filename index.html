@@ -346,7 +346,96 @@
     .form-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  /* ===== SCROLLBAR ===== */
+  /* ===== EXCEL-STYLE COLUMN FILTERS ===== */
+  .th-inner {
+    display: flex; align-items: center; justify-content: space-between; gap: 4px;
+    white-space: nowrap;
+  }
+  .filter-icon-btn {
+    background: none; border: 1px solid transparent;
+    cursor: pointer; padding: 1px 4px; border-radius: 3px;
+    font-size: 9px; color: #aab2c8; line-height: 1; flex-shrink: 0;
+    transition: all .15s;
+  }
+  .filter-icon-btn:hover  { border-color: var(--accent); color: var(--accent); background: #e8f0fe; }
+  .filter-icon-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Filter dropdown panel */
+  .col-filter-panel {
+    position: absolute;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(30,50,100,.18);
+    z-index: 9999;
+    min-width: 200px;
+    font-size: 13px;
+    font-family: var(--font-body);
+    overflow: hidden;
+  }
+  .cfp-header {
+    padding: 10px 14px 8px;
+    font-family: var(--font-head);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cfp-header button {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; color: var(--muted); line-height: 1; padding: 0;
+  }
+  .cfp-header button:hover { color: var(--rejected); }
+  .cfp-actions {
+    display: flex; gap: 6px; padding: 7px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cfp-actions button {
+    font-size: 11px; padding: 3px 10px; border-radius: 5px;
+    border: 1px solid var(--border); background: #f5f7fb;
+    cursor: pointer; color: var(--muted); font-family: var(--font-body);
+    transition: all .15s;
+  }
+  .cfp-actions button:hover { border-color: var(--accent); color: var(--accent); }
+  .cfp-list { max-height: 210px; overflow-y: auto; padding: 4px 0; }
+  .cfp-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 14px; cursor: pointer; transition: background .12s;
+  }
+  .cfp-item:hover { background: #f0f5ff; }
+  .cfp-item input[type="checkbox"] {
+    accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; flex-shrink: 0;
+  }
+  .cfp-item span { cursor: pointer; font-size: 12px; }
+  .cfp-footer {
+    padding: 8px 10px; border-top: 1px solid var(--border);
+    display: flex; gap: 6px; justify-content: flex-end;
+  }
+  .cfp-btn-apply {
+    background: var(--accent); color: #fff; border: none;
+    padding: 6px 16px; border-radius: 6px; font-size: 12px;
+    font-family: var(--font-body); cursor: pointer; font-weight: 500;
+  }
+  .cfp-btn-apply:hover { opacity: .88; }
+  .cfp-btn-cancel {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-family: var(--font-body); cursor: pointer;
+  }
+  .cfp-btn-cancel:hover { border-color: var(--muted); }
+  .table-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 14px; background: #f9fafb;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+  }
+  .filter-clear-btn {
+    font-size: 11px; padding: 3px 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    color: var(--muted); cursor: pointer; transition: all .2s;
+  }
+  .filter-clear-btn:hover { border-color: var(--rejected); color: var(--rejected); }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #c5cde0; border-radius: 3px; }
@@ -612,6 +701,12 @@
       <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
     </div>
 
+    <!-- Channel-wise Pie Chart -->
+    <div class="chart-card">
+      <div class="chart-title"><span>🥧</span> Channel-wise Complaint Analysis</div>
+      <div class="chart-container"><canvas id="chartChannel"></canvas></div>
+    </div>
+
   </div>
 
 </main>
@@ -863,6 +958,140 @@ async function loadFromSheets() {
   }
 }
 
+// ── EXCEL-STYLE COLUMN FILTERS ─────────────────────────────
+// activeFilters[col] = Set of selected values (null = show all)
+const activeFilters = {};
+let openFilterCol   = null;   // which column panel is open
+
+const COL_KEYS = [
+  { key: 'complaintNo', label: 'No'        },
+  { key: 'month',       label: 'Month'     },
+  { key: 'code',        label: 'Code'      },
+  { key: 'grade',       label: 'Grade'     },
+  { key: 'size',        label: 'Size'      },
+  { key: 'lot',         label: 'Lot'       },
+  { key: 'location',    label: 'Location'  },
+  { key: 'channel',     label: 'Channel'   },
+  { key: 'salesLoc',    label: 'Sales Loc' },
+  { key: 'rootCause',   label: 'Root Cause'},
+  { key: 'status',      label: 'Status'    },
+  { key: 'timestamp',   label: 'Added'     },
+];
+
+// Get unique values for a column from all records
+function getColValues(key) {
+  const vals = records.map(r => String(r[key] || '—').trim()).filter(Boolean);
+  return [...new Set(vals)].sort();
+}
+
+// Are any filters active?
+function hasActiveFilters() {
+  return Object.keys(activeFilters).some(k => activeFilters[k] !== null);
+}
+
+// Apply all active filters to records
+function getFilteredRecords() {
+  return [...records].reverse().filter(r => {
+    return COL_KEYS.every(({ key }) => {
+      const f = activeFilters[key];
+      if (!f) return true;          // no filter on this col
+      return f.has(String(r[key] || '—').trim());
+    });
+  });
+}
+
+// Clear all filters
+function clearTableFilters() {
+  Object.keys(activeFilters).forEach(k => delete activeFilters[k]);
+  closeFilterPanel();
+  renderTable();
+}
+
+// Open / close the filter panel for a column
+function toggleFilterPanel(col, btnEl) {
+  if (openFilterCol === col) { closeFilterPanel(); return; }
+  closeFilterPanel();
+  openFilterCol = col;
+
+  const allVals    = getColValues(col);
+  const selected   = activeFilters[col] || new Set(allVals);
+  const allChecked = !activeFilters[col];
+
+  const panel = document.createElement('div');
+  panel.id        = 'colFilterPanel';
+  panel.className = 'col-filter-panel';
+
+  panel.innerHTML = `
+    <div class="cfp-header">
+      <span>${COL_KEYS.find(c=>c.key===col)?.label || col}</span>
+      <button onclick="closeFilterPanel()" title="Close">✕</button>
+    </div>
+    <div class="cfp-actions">
+      <button onclick="cfpSelectAll()">Select All</button>
+      <button onclick="cfpClearAll()">Clear All</button>
+    </div>
+    <div class="cfp-list" id="cfpList">
+      ${allVals.map(v => `
+        <label class="cfp-item">
+          <input type="checkbox" value="${v.replace(/"/g,'&quot;')}"
+            ${selected.has(v) ? 'checked' : ''}
+            onchange="cfpToggle(this)"/>
+          <span>${v}</span>
+        </label>`).join('')}
+    </div>
+    <div class="cfp-footer">
+      <button class="cfp-btn-cancel" onclick="closeFilterPanel()">Cancel</button>
+      <button class="cfp-btn-apply"  onclick="cfpApply('${col}')">Apply</button>
+    </div>`;
+
+  document.body.appendChild(panel);
+
+  // Position below the button
+  const rect = btnEl.getBoundingClientRect();
+  const pw   = 220;
+  let left   = rect.left;
+  if (left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+  panel.style.left = left + 'px';
+  panel.style.top  = (rect.bottom + 4 + window.scrollY) + 'px';
+
+  // Close on outside click
+  setTimeout(() => document.addEventListener('click', outsideClose), 0);
+}
+
+function outsideClose(e) {
+  const panel = document.getElementById('colFilterPanel');
+  if (panel && !panel.contains(e.target) && !e.target.classList.contains('filter-icon-btn')) {
+    closeFilterPanel();
+  }
+}
+
+function closeFilterPanel() {
+  const panel = document.getElementById('colFilterPanel');
+  if (panel) panel.remove();
+  openFilterCol = null;
+  document.removeEventListener('click', outsideClose);
+}
+
+function cfpSelectAll() {
+  document.querySelectorAll('#cfpList input[type=checkbox]').forEach(cb => cb.checked = true);
+}
+function cfpClearAll() {
+  document.querySelectorAll('#cfpList input[type=checkbox]').forEach(cb => cb.checked = false);
+}
+function cfpToggle(cb) { /* individual checkbox — handled on Apply */ }
+
+function cfpApply(col) {
+  const checked = [...document.querySelectorAll('#cfpList input[type=checkbox]:checked')].map(cb => cb.value);
+  const allVals = getColValues(col);
+  if (checked.length === 0 || checked.length === allVals.length) {
+    delete activeFilters[col];   // same as "all" — remove filter
+  } else {
+    activeFilters[col] = new Set(checked);
+  }
+  closeFilterPanel();
+  renderTable();
+}
+
 // ── RENDER TABLE ───────────────────────────────────────────
 function renderTable() {
   const wrap = document.getElementById('tableWrap');
@@ -872,29 +1101,50 @@ function renderTable() {
     return;
   }
 
-  const rows = [...records].reverse().map(r => `
-    <tr>
-      <td>${r.complaintNo}</td>
-      <td>${r.month}</td>
-      <td>${r.code || '—'}</td>
-      <td>${r.grade || '—'}</td>
-      <td>${r.size || '—'}</td>
-      <td>${r.lot || '—'}</td>
-      <td>${r.location || '—'}</td>
-      <td>${r.channel || '—'}</td>
-      <td>${r.salesLoc || '—'}</td>
-      <td>${r.rootCause || '—'}</td>
-      <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
-      <td>${r.timestamp}</td>
-      <td><button class="btn-icon" title="Delete" onclick="deleteRecord(${r.id})">✕</button></td>
-    </tr>`).join('');
+  const filtered = getFilteredRecords();
+  const anyFilter = hasActiveFilters();
+
+  // Build header cell with filter icon
+  const th = ({ key, label }) => {
+    const isActive = !!activeFilters[key];
+    return `<th>
+      <div class="th-inner">
+        <span>${label}</span>
+        <button class="filter-icon-btn${isActive ? ' active' : ''}"
+          onclick="toggleFilterPanel('${key}', this)"
+          title="Filter ${label}">&#9660;</button>
+      </div>
+    </th>`;
+  };
+
+  const rows = filtered.length
+    ? filtered.map(r => `
+      <tr>
+        <td>${r.complaintNo}</td>
+        <td>${r.month      || '—'}</td>
+        <td>${r.code       || '—'}</td>
+        <td>${r.grade      || '—'}</td>
+        <td>${r.size       || '—'}</td>
+        <td>${r.lot        || '—'}</td>
+        <td>${r.location   || '—'}</td>
+        <td>${r.channel    || '—'}</td>
+        <td>${r.salesLoc   || '—'}</td>
+        <td>${r.rootCause  || '—'}</td>
+        <td><span class="badge badge-${(r.status||'pending').toLowerCase()}">${r.status}</span></td>
+        <td>${r.timestamp  || '—'}</td>
+        <td><button class="btn-icon" title="Delete" onclick="deleteRecord(${r.id})">✕</button></td>
+      </tr>`).join('')
+    : `<tr><td colspan="13" style="text-align:center;padding:20px;color:var(--muted);font-style:italic;">No records match the current filters.</td></tr>`;
 
   wrap.innerHTML = `
+    <div class="table-meta">
+      <span>Showing <strong>${filtered.length}</strong> of <strong>${records.length}</strong> records</span>
+      ${anyFilter ? `<button class="filter-clear-btn" onclick="clearTableFilters()">✕ Clear All Filters</button>` : ''}
+    </div>
     <table>
       <thead><tr>
-        <th>No</th><th>Month</th><th>Code</th><th>Grade</th><th>Size</th>
-        <th>Lot</th><th>Location</th><th>Channel</th><th>Sales Loc</th>
-        <th>Root Cause</th><th>Status</th><th>Added</th><th></th>
+        ${COL_KEYS.map(th).join('')}
+        <th></th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
@@ -1155,6 +1405,47 @@ function buildCharts() {
       }
     }
   });
+
+  // 7. Channel-wise Pie Chart
+  charts.channel = new Chart(document.getElementById('chartChannel'), {
+    type: 'doughnut',
+    data: {
+      labels: ['FD', 'DB', 'FO', 'SH', 'OEM'],
+      datasets: [{
+        data: [0, 0, 0, 0, 0],
+        backgroundColor: ['#4f8ef7', '#7c5af7', '#22c55e', '#f97316', '#ef4444'],
+        borderColor: '#ffffff',
+        borderWidth: 3,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 14, padding: 16 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const sum = ctx.dataset.data.reduce((a,b) => a+b, 0);
+              const pct = sum ? ((ctx.parsed / sum) * 100).toFixed(1) : 0;
+              return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+            }
+          }
+        },
+        datalabels: {
+          color: '#fff',
+          font: { weight: '700', size: 12 },
+          formatter: (v, ctx) => {
+            const sum = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            if (!v || !sum) return '';
+            const pct = ((v / sum) * 100).toFixed(1);
+            return `${ctx.chart.data.labels[ctx.dataIndex]}\n${v} (${pct}%)`;
+          }
+        }
+      },
+      cutout: '50%'
+    }
+  });
 }
 
 // ── REFRESH CHARTS ─────────────────────────────────────────
@@ -1166,6 +1457,7 @@ function refreshCharts() {
   refreshSizeChart();
   refreshRootCauseStatusChart();
   refreshRootCauseMonthChart();
+  refreshChannelChart();
 }
 
 function refreshMonthChart() {
@@ -1326,6 +1618,20 @@ function refreshRootCauseMonthChart() {
   canvasEl.style.display = 'block';
   emptyEl.style.display  = 'none';
   charts.rcMonth.update();
+}
+
+// 7. Channel-wise Pie Chart
+function refreshChannelChart() {
+  const CHANNELS = ['FD', 'DB', 'FO', 'SH', 'OEM'];
+  const counts = [0, 0, 0, 0, 0];
+
+  records.forEach(r => {
+    const idx = CHANNELS.indexOf((r.channel || '').toString().trim().toUpperCase());
+    if (idx !== -1) counts[idx]++;
+  });
+
+  charts.channel.data.datasets[0].data = counts;
+  charts.channel.update();
 }
 
 // ── EXPORT CSV ─────────────────────────────────────────────
