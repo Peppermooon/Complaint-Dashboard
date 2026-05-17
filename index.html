@@ -439,6 +439,135 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #c5cde0; border-radius: 3px; }
+
+  /* ═══════════════════════════════════════════════
+     MOBILE UI — screens < 768px
+  ═══════════════════════════════════════════════ */
+  @media (max-width: 767px) {
+
+    /* ── Header ── */
+    .site-header {
+      height: 56px; padding: 0 16px; gap: 10px;
+    }
+    .site-header h1 {
+      font-size: 13px; white-space: normal; line-height: 1.2;
+    }
+    .date-wrap label { display: none; }
+    .date-wrap input[type="date"] { font-size: 11px; padding: 5px 8px; }
+
+    /* ── Body padding for bottom nav ── */
+    body { padding-bottom: 70px; }
+
+    /* ── Main ── */
+    main { padding: 12px 12px 20px; }
+
+    /* ── Mobile tab sections — hide all, show active ── */
+    .mob-section { display: none; }
+    .mob-section.mob-active { display: block; }
+
+    /* ── Stat summary cards row (Dashboard tab) ── */
+    .mob-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .mob-stat-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .mob-stat-card .stat-val {
+      font-family: var(--font-head);
+      font-size: 28px; font-weight: 800;
+      color: var(--accent); line-height: 1;
+    }
+    .mob-stat-card .stat-lbl {
+      font-size: 11px; color: var(--muted);
+      margin-top: 4px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .mob-stat-card.accepted .stat-val { color: var(--accepted); }
+    .mob-stat-card.rejected .stat-val { color: var(--rejected); }
+    .mob-stat-card.pending  .stat-val { color: var(--pending);  }
+
+    /* ── Sheets banner compact ── */
+    .sheets-banner {
+      padding: 12px 14px; gap: 10px; margin-bottom: 14px;
+    }
+    .sheets-banner .sheets-icon { font-size: 20px; }
+    .sheets-banner h3 { font-size: 12px; }
+    .sheets-banner p  { font-size: 11px; margin-bottom: 8px; }
+    .banner-btn-row   { flex-direction: column; gap: 6px; }
+    .banner-btn-row .btn { width: 100%; text-align: center; font-size: 12px; padding: 9px; }
+
+    /* ── Form ── */
+    .form-grid { grid-template-columns: 1fr; gap: 10px; }
+    .btn-row   { flex-direction: column; gap: 8px; }
+    .btn-row .btn { width: 100%; text-align: center; }
+    .section-title { font-size: 11px; margin-bottom: 12px; }
+
+    /* ── Charts: single column, shorter ── */
+    .charts-grid { grid-template-columns: 1fr; gap: 14px; }
+    .chart-container { height: 220px; }
+    .chart-card { padding: 14px 12px; }
+    .chart-title { font-size: 12px; margin-bottom: 12px; }
+
+    /* ── Table: horizontal scroll, compact ── */
+    .table-wrap { max-height: 360px; }
+
+    /* ── Filter panel stays in viewport ── */
+    .col-filter-panel { min-width: 180px; max-width: calc(100vw - 24px); }
+
+    /* ── Bottom Navigation Bar ── */
+    .mob-nav {
+      display: flex;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: 62px; z-index: 200;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(30,50,100,.10);
+    }
+    .mob-nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer;
+      background: none; border: none;
+      font-family: var(--font-body);
+      color: var(--muted);
+      font-size: 10px; font-weight: 500;
+      transition: color .2s;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .mob-nav-item .nav-icon { font-size: 20px; line-height: 1; }
+    .mob-nav-item.mob-nav-active { color: var(--accent); }
+    .mob-nav-item.mob-nav-active .nav-icon { transform: scale(1.15); }
+
+    /* Active tab indicator dot */
+    .mob-nav-item.mob-nav-active::after {
+      content: '';
+      display: block;
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      position: absolute;
+      bottom: 6px;
+    }
+
+    /* ── Hide desktop elements on mobile ── */
+    .desk-only { display: none !important; }
+  }
+
+  /* ── Hide mobile nav on desktop ── */
+  @media (min-width: 768px) {
+    .mob-nav     { display: none !important; }
+    .mob-section { display: block !important; }
+    .mob-stats-grid { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -455,261 +584,308 @@
 <!-- ===== MAIN ===== -->
 <main>
 
-  <!-- GOOGLE SHEETS STATUS BANNER -->
-  <div class="sheets-banner">
-    <div class="sheets-icon">📗</div>
-    <div class="sheets-body">
-      <h3>Google Sheets Integration — Two-Way Sync</h3>
-      <p>Records added here are saved to Google Sheets instantly. You can also type data directly into the Google Sheet and click <strong>⬇ Load from Sheets</strong> to pull it into the dashboard.</p>
-      <div class="banner-btn-row">
-        <button class="btn btn-sheets" onclick="loadFromSheets()">⬇ Load from Sheets</button>
-        <button class="btn btn-green" onclick="syncAllToSheets()">☁ Sync All to Sheets</button>
+  <!-- ══════════════════════════════════
+       MOBILE: DASHBOARD TAB (Home)
+  ══════════════════════════════════ -->
+  <div class="mob-section mob-active" id="mob-dashboard">
+
+    <!-- Stat summary cards (mobile only) -->
+    <div class="mob-stats-grid">
+      <div class="mob-stat-card">
+        <div class="stat-val" id="statTotal">0</div>
+        <div class="stat-lbl">Total</div>
       </div>
-      <div id="sheetsStatus" class="sheets-status idle">⬤ &nbsp;Initialising…</div>
-    </div>
-  </div>
-
-  <!-- INPUT FORM -->
-  <div class="section-title">📋 Add Complaint Record</div>
-  <div class="card">
-    <div class="form-grid">
-
-      <div class="field">
-        <label>Month</label>
-        <select id="fMonth">
-          <option value="">— Select —</option>
-          <option>January</option><option>February</option><option>March</option>
-          <option>April</option><option>May</option><option>June</option>
-          <option>July</option><option>August</option><option>September</option>
-          <option>October</option><option>November</option><option>December</option>
-        </select>
+      <div class="mob-stat-card accepted">
+        <div class="stat-val" id="statAccepted">0</div>
+        <div class="stat-lbl">Accepted</div>
       </div>
-
-      <div class="field">
-        <label>Complaint No</label>
-        <input type="number" id="fComplaintNo" placeholder="Auto / Manual"/>
+      <div class="mob-stat-card rejected">
+        <div class="stat-val" id="statRejected">0</div>
+        <div class="stat-lbl">Rejected</div>
       </div>
-
-      <div class="field">
-        <label>Code</label>
-        <input type="text" id="fCode" placeholder="e.g. CR-001"/>
-      </div>
-
-      <div class="field">
-        <label>Grade</label>
-        <select id="fGrade">
-          <option value="">— Select —</option>
-          <option>1</option><option>C</option><option>D</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Size</label>
-        <select id="fSize">
-          <option value="">— Select —</option>
-          <option value="500x500">500x500</option>
-          <option value="600x600">600x600</option>
-          <option value="800x800">800x800</option>
-          <option value="600x1200">600x1200</option>
-          <option value="800x1200">800x1200</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Lot (YY/MM)</label>
-        <input type="text" id="fLot" placeholder="e.g. 26/04" maxlength="5"/>
-      </div>
-
-      <div class="field">
-        <label>Location</label>
-        <input type="text" id="fLocation" placeholder="e.g. Warehouse A"/>
-      </div>
-
-      <div class="field">
-        <label>Channel</label>
-        <select id="fChannel">
-          <option value="">— Select —</option>
-          <option>FD</option><option>DB</option><option>FO</option>
-          <option>SH</option><option>OEM</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Sales Location</label>
-        <input type="text" id="fSalesLocation" placeholder="e.g. Colombo"/>
-      </div>
-
-      <div class="field">
-        <label>Root Cause</label>
-        <select id="fRootCause">
-          <option value="">— Select —</option>
-          <option>Colour Variation</option>
-          <option>Lot, shade, type mixing</option>
-          <option>Position variation</option>
-          <option>Staining (polished)</option>
-          <option>Dirtiness (High rough)</option>
-          <option>Water mark</option>
-          <option>Cutting issue (80x120)</option>
-          <option>Flatness</option>
-          <option>Scratch marks</option>
-          <option>Cracked tiles</option>
-          <option>Chamfering issue</option>
-          <option>Others</option>
-          <option>Surface defect</option>
-          <option>Size variation</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label>Status</label>
-        <select id="fStatus">
-          <option value="">— Select —</option>
-          <option>Pending</option><option>Accepted</option><option>Rejected</option>
-        </select>
-      </div>
-
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="addRecord()">➕ Add Record</button>
-      <button class="btn btn-danger" onclick="clearAll()">🗑 Clear All Data</button>
-      <button class="btn btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
-    </div>
-  </div>
-
-  <!-- DATA TABLE -->
-  <div class="section-title" style="margin-top:32px;">📄 Complaint Records</div>
-  <div class="card" style="padding:0; overflow:hidden;">
-    <div class="table-wrap" id="tableWrap">
-      <div class="empty-state">
-        <div class="icon">📭</div>
-        No records yet. Add your first complaint above.
-      </div>
-    </div>
-  </div>
-
-  <!-- CHARTS -->
-  <div class="section-title" style="margin-top:36px;">📊 Analysis Dashboard</div>
-  <div class="charts-grid">
-
-    <div class="chart-card">
-      <div class="chart-title"><span>📊</span> Month-wise Complaints</div>
-      <div class="chart-container"><canvas id="chartMonth"></canvas></div>
-    </div>
-
-    <!-- NEW: Month-wise Stacked by Status -->
-    <div class="chart-card">
-      <div class="chart-title"><span>📊</span> Month-wise Complaints by Status</div>
-      <div style="position:relative; width:100%; height:280px;">
-        <canvas id="chartMonthStacked"></canvas>
+      <div class="mob-stat-card pending">
+        <div class="stat-val" id="statPending">0</div>
+        <div class="stat-lbl">Pending</div>
       </div>
     </div>
 
-    <div class="chart-card">
-      <div class="chart-title"><span>📉</span> Root Cause Pareto</div>
-      <div class="chart-container"><canvas id="chartPareto"></canvas></div>
-    </div>
-
-    <div class="chart-card">
-      <div class="chart-title"><span>🥧</span> Status Distribution</div>
-      <div class="chart-container"><canvas id="chartStatus"></canvas></div>
-    </div>
-
-    <!-- Size-wise with Root Cause filter -->
-    <div class="chart-card">
-      <div class="chart-title"><span>📊</span> Size-wise Complaint Analysis by Status</div>
-      <div class="chart-filter-row">
-        <label class="filter-label">Root Cause:</label>
-        <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
-          <option value="">All Root Causes</option>
-          <option>Colour Variation</option>
-          <option>Lot, shade, type mixing</option>
-          <option>Position variation</option>
-          <option>Staining (polished)</option>
-          <option>Dirtiness (High rough)</option>
-          <option>Water mark</option>
-          <option>Cutting issue (80x120)</option>
-          <option>Flatness</option>
-          <option>Scratch marks</option>
-          <option>Cracked tiles</option>
-          <option>Chamfering issue</option>
-          <option>Others</option>
-          <option>Surface defect</option>
-          <option>Size variation</option>
-        </select>
-      </div>
-      <div style="position:relative; width:100%; height:280px;">
-        <canvas id="chartSize"></canvas>
+    <!-- Sheets banner -->
+    <div class="sheets-banner">
+      <div class="sheets-icon">📗</div>
+      <div class="sheets-body">
+        <h3>Google Sheets Integration — Two-Way Sync</h3>
+        <p>Records added here are saved to Google Sheets instantly. You can also type data directly into the Google Sheet and click <strong>⬇ Load from Sheets</strong> to pull it into the dashboard.</p>
+        <div class="banner-btn-row">
+          <button class="btn btn-sheets" onclick="loadFromSheets()">⬇ Load from Sheets</button>
+          <button class="btn btn-green" onclick="syncAllToSheets()">☁ Sync All to Sheets</button>
+        </div>
+        <div id="sheetsStatus" class="sheets-status idle">⬤ &nbsp;Initialising…</div>
       </div>
     </div>
 
-    <!-- NEW: Root Cause Status Pie -->
-    <div class="chart-card">
-      <div class="chart-title"><span>🥧</span> Root Cause — Status Analysis</div>
-      <div class="chart-filter-row">
-        <label class="filter-label">Root Cause:</label>
-        <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
-          <option value="">— Select Root Cause —</option>
-          <option>Colour Variation</option>
-          <option>Lot, shade, type mixing</option>
-          <option>Position variation</option>
-          <option>Staining (polished)</option>
-          <option>Dirtiness (High rough)</option>
-          <option>Water mark</option>
-          <option>Cutting issue (80x120)</option>
-          <option>Flatness</option>
-          <option>Scratch marks</option>
-          <option>Cracked tiles</option>
-          <option>Chamfering issue</option>
-          <option>Others</option>
-          <option>Surface defect</option>
-          <option>Size variation</option>
-        </select>
-      </div>
-      <div style="position:relative; width:100%; height:260px;">
-        <canvas id="chartRootCauseStatus"></canvas>
-      </div>
-      <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
-    </div>
+    <!-- Charts (shown on dashboard tab on mobile) -->
+    <div class="section-title">📊 Analysis Dashboard</div>
+    <div class="charts-grid" id="chartsGrid">
 
-    <!-- NEW: Root Cause Month-wise Column -->
-    <div class="chart-card">
-      <div class="chart-title"><span>📊</span> Root Cause — Month-wise Analysis</div>
-      <div class="chart-filter-row">
-        <label class="filter-label">Root Cause:</label>
-        <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
-          <option value="">— Select Root Cause —</option>
-          <option>Colour Variation</option>
-          <option>Lot, shade, type mixing</option>
-          <option>Position variation</option>
-          <option>Staining (polished)</option>
-          <option>Dirtiness (High rough)</option>
-          <option>Water mark</option>
-          <option>Cutting issue (80x120)</option>
-          <option>Flatness</option>
-          <option>Scratch marks</option>
-          <option>Cracked tiles</option>
-          <option>Chamfering issue</option>
-          <option>Others</option>
-          <option>Surface defect</option>
-          <option>Size variation</option>
-        </select>
+      <div class="chart-card">
+        <div class="chart-title"><span>📊</span> Month-wise Complaints</div>
+        <div class="chart-container"><canvas id="chartMonth"></canvas></div>
       </div>
-      <div style="position:relative; width:100%; height:260px;">
-        <canvas id="chartRootCauseMonth"></canvas>
+
+      <div class="chart-card">
+        <div class="chart-title"><span>📊</span> Month-wise Complaints by Status</div>
+        <div style="position:relative; width:100%; height:280px;">
+          <canvas id="chartMonthStacked"></canvas>
+        </div>
       </div>
-      <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
-    </div>
 
-    <!-- Channel-wise Pie Chart -->
-    <div class="chart-card">
-      <div class="chart-title"><span>🥧</span> Channel-wise Complaint Analysis</div>
-      <div class="chart-container"><canvas id="chartChannel"></canvas></div>
-    </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>📉</span> Root Cause Pareto</div>
+        <div class="chart-container"><canvas id="chartPareto"></canvas></div>
+      </div>
 
-  </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>🥧</span> Status Distribution</div>
+        <div class="chart-container"><canvas id="chartStatus"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"><span>📊</span> Size-wise Complaint Analysis by Status</div>
+        <div class="chart-filter-row">
+          <label class="filter-label">Root Cause:</label>
+          <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
+            <option value="">All Root Causes</option>
+            <option>Colour Variation</option>
+            <option>Lot, shade, type mixing</option>
+            <option>Position variation</option>
+            <option>Staining (polished)</option>
+            <option>Dirtiness (High rough)</option>
+            <option>Water mark</option>
+            <option>Cutting issue (80x120)</option>
+            <option>Flatness</option>
+            <option>Scratch marks</option>
+            <option>Cracked tiles</option>
+            <option>Chamfering issue</option>
+            <option>Others</option>
+            <option>Surface defect</option>
+            <option>Size variation</option>
+          </select>
+        </div>
+        <div style="position:relative; width:100%; height:280px;">
+          <canvas id="chartSize"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"><span>🥧</span> Root Cause — Status Analysis</div>
+        <div class="chart-filter-row">
+          <label class="filter-label">Root Cause:</label>
+          <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
+            <option value="">— Select Root Cause —</option>
+            <option>Colour Variation</option>
+            <option>Lot, shade, type mixing</option>
+            <option>Position variation</option>
+            <option>Staining (polished)</option>
+            <option>Dirtiness (High rough)</option>
+            <option>Water mark</option>
+            <option>Cutting issue (80x120)</option>
+            <option>Flatness</option>
+            <option>Scratch marks</option>
+            <option>Cracked tiles</option>
+            <option>Chamfering issue</option>
+            <option>Others</option>
+            <option>Surface defect</option>
+            <option>Size variation</option>
+          </select>
+        </div>
+        <div style="position:relative; width:100%; height:260px;">
+          <canvas id="chartRootCauseStatus"></canvas>
+        </div>
+        <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"><span>📊</span> Root Cause — Month-wise Analysis</div>
+        <div class="chart-filter-row">
+          <label class="filter-label">Root Cause:</label>
+          <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
+            <option value="">— Select Root Cause —</option>
+            <option>Colour Variation</option>
+            <option>Lot, shade, type mixing</option>
+            <option>Position variation</option>
+            <option>Staining (polished)</option>
+            <option>Dirtiness (High rough)</option>
+            <option>Water mark</option>
+            <option>Cutting issue (80x120)</option>
+            <option>Flatness</option>
+            <option>Scratch marks</option>
+            <option>Cracked tiles</option>
+            <option>Chamfering issue</option>
+            <option>Others</option>
+            <option>Surface defect</option>
+            <option>Size variation</option>
+          </select>
+        </div>
+        <div style="position:relative; width:100%; height:260px;">
+          <canvas id="chartRootCauseMonth"></canvas>
+        </div>
+        <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title"><span>🥧</span> Channel-wise Complaint Analysis</div>
+        <div class="chart-container"><canvas id="chartChannel"></canvas></div>
+      </div>
+
+    </div>
+  </div><!-- end mob-dashboard -->
+
+  <!-- ══════════════════════════════════
+       ADD RECORD TAB
+  ══════════════════════════════════ -->
+  <div class="mob-section" id="mob-add">
+    <div class="section-title">📋 Add Complaint Record</div>
+    <div class="card">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Month</label>
+          <select id="fMonth">
+            <option value="">— Select —</option>
+            <option>January</option><option>February</option><option>March</option>
+            <option>April</option><option>May</option><option>June</option>
+            <option>July</option><option>August</option><option>September</option>
+            <option>October</option><option>November</option><option>December</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Complaint No</label>
+          <input type="number" id="fComplaintNo" placeholder="Auto / Manual"/>
+        </div>
+
+        <div class="field">
+          <label>Code</label>
+          <input type="text" id="fCode" placeholder="e.g. CR-001"/>
+        </div>
+
+        <div class="field">
+          <label>Grade</label>
+          <select id="fGrade">
+            <option value="">— Select —</option>
+            <option>1</option><option>C</option><option>D</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Size</label>
+          <select id="fSize">
+            <option value="">— Select —</option>
+            <option value="500x500">500x500</option>
+            <option value="600x600">600x600</option>
+            <option value="800x800">800x800</option>
+            <option value="600x1200">600x1200</option>
+            <option value="800x1200">800x1200</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Lot (YY/MM)</label>
+          <input type="text" id="fLot" placeholder="e.g. 26/04" maxlength="5"/>
+        </div>
+
+        <div class="field">
+          <label>Location</label>
+          <input type="text" id="fLocation" placeholder="e.g. Colombo"/>
+        </div>
+
+        <div class="field">
+          <label>Channel</label>
+          <select id="fChannel">
+            <option value="">— Select —</option>
+            <option>FD</option><option>DB</option><option>FO</option>
+            <option>SH</option><option>OEM</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Sales Location</label>
+          <input type="text" id="fSalesLocation" placeholder="e.g. Colombo"/>
+        </div>
+
+        <div class="field">
+          <label>Root Cause</label>
+          <select id="fRootCause">
+            <option value="">— Select —</option>
+            <option>Colour Variation</option>
+            <option>Lot, shade, type mixing</option>
+            <option>Position variation</option>
+            <option>Staining (polished)</option>
+            <option>Dirtiness (High rough)</option>
+            <option>Water mark</option>
+            <option>Cutting issue (80x120)</option>
+            <option>Flatness</option>
+            <option>Scratch marks</option>
+            <option>Cracked tiles</option>
+            <option>Chamfering issue</option>
+            <option>Others</option>
+            <option>Surface defect</option>
+            <option>Size variation</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="">— Select —</option>
+            <option>Pending</option><option>Accepted</option><option>Rejected</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addRecord()">➕ Add Record</button>
+        <button class="btn btn-danger" onclick="clearAll()">🗑 Clear All Data</button>
+        <button class="btn btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+  </div><!-- end mob-add -->
+
+  <!-- ══════════════════════════════════
+       RECORDS TAB
+  ══════════════════════════════════ -->
+  <div class="mob-section" id="mob-records">
+    <div class="section-title">📄 Complaint Records</div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-wrap" id="tableWrap">
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          No records yet. Add your first complaint above.
+        </div>
+      </div>
+    </div>
+  </div><!-- end mob-records -->
 
 </main>
+
+<!-- ═══════════════════════════════════════
+     MOBILE BOTTOM NAVIGATION BAR
+═══════════════════════════════════════ -->
+<nav class="mob-nav">
+  <button class="mob-nav-item mob-nav-active" id="nav-dashboard" onclick="switchTab('dashboard')">
+    <span class="nav-icon">🏠</span>
+    <span>Dashboard</span>
+  </button>
+  <button class="mob-nav-item" id="nav-add" onclick="switchTab('add')">
+    <span class="nav-icon">➕</span>
+    <span>Add</span>
+  </button>
+  <button class="mob-nav-item" id="nav-records" onclick="switchTab('records')">
+    <span class="nav-icon">📄</span>
+    <span>Records</span>
+  </button>
+</nav>
 
 <!-- TOAST -->
 <div id="toast"></div>
@@ -718,6 +894,30 @@
 /* ============================================================
    CUSTOMER COMPLAINT ANALYSIS — DASHBOARD JS
    ============================================================ */
+
+// ── MOBILE TAB NAVIGATION ──────────────────────────────────
+function switchTab(tab) {
+  // Hide all sections
+  document.querySelectorAll('.mob-section').forEach(s => s.classList.remove('mob-active'));
+  document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('mob-nav-active'));
+  // Show selected
+  document.getElementById('mob-' + tab).classList.add('mob-active');
+  document.getElementById('nav-' + tab).classList.add('mob-nav-active');
+  // Resize charts when switching to dashboard tab (canvas may have been hidden)
+  if (tab === 'dashboard') {
+    setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
+  }
+}
+
+// ── UPDATE MOBILE STAT CARDS ───────────────────────────────
+function updateStatCards() {
+  const el = id => document.getElementById(id);
+  if (!el('statTotal')) return;
+  el('statTotal').textContent    = records.length;
+  el('statAccepted').textContent = records.filter(r => r.status === 'Accepted').length;
+  el('statRejected').textContent = records.filter(r => r.status === 'Rejected').length;
+  el('statPending').textContent  = records.filter(r => r.status === 'Pending').length;
+}
 
 // ── CONSTANTS ──────────────────────────────────────────────
 const STORAGE_KEY = 'cca_records_v1';
@@ -747,6 +947,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTable();
   buildCharts();
   refreshCharts();
+  updateStatCards();
 });
 
 // ── DATE PICKER ────────────────────────────────────────────
@@ -806,10 +1007,11 @@ function addRecord() {
   nextId = Math.max(nextId, complaintNo) + 1;
 
   saveToStorage();
-  sendRecordToSheets(record);   // ← auto-push to Google Sheets
+  sendRecordToSheets(record);
   resetForm();
   renderTable();
   refreshCharts();
+  updateStatCards();
   showToast('✅ Record added successfully!');
 }
 
@@ -827,6 +1029,7 @@ function deleteRecord(id) {
   saveToStorage();
   renderTable();
   refreshCharts();
+  updateStatCards();
   showToast('🗑 Record deleted.', '#f97316');
 }
 
@@ -837,6 +1040,7 @@ function clearAll() {
   saveToStorage();
   renderTable();
   refreshCharts();
+  updateStatCards();
   showToast('All data cleared.', '#ef4444');
 }
 
@@ -947,6 +1151,7 @@ async function loadFromSheets() {
     saveToStorage();
     renderTable();
     refreshCharts();
+    updateStatCards();
 
     setSheetStatus('connected', `✅ Loaded ${records.length} records from Google Sheets`);
     showToast(`⬇ ${records.length} records loaded from Google Sheets!`);
