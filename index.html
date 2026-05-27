@@ -436,6 +436,43 @@
     color: var(--muted); cursor: pointer; transition: all .2s;
   }
   .filter-clear-btn:hover { border-color: var(--rejected); color: var(--rejected); }
+  /* ===== DESKTOP STAT CARDS ===== */
+  .desk-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .desk-stat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 16px;
+    box-shadow: var(--shadow);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .desk-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(30,50,100,.13);
+  }
+  .desk-stat-icon { font-size: 32px; line-height: 1; flex-shrink: 0; }
+  .desk-stat-body { flex: 1; }
+  .desk-stat-val {
+    font-family: var(--font-head);
+    font-size: 36px; font-weight: 800;
+    line-height: 1; color: var(--accent);
+  }
+  .desk-stat-lbl {
+    font-size: 12px; color: var(--muted);
+    font-weight: 500; text-transform: uppercase;
+    letter-spacing: .05em; margin-top: 3px;
+  }
+  .desk-stat-card.accepted .desk-stat-val { color: var(--accepted); }
+  .desk-stat-card.rejected .desk-stat-val { color: var(--rejected); }
+  .desk-stat-card.pending  .desk-stat-val { color: var(--pending);  }
+  @media (max-width: 767px) { .desk-stats-grid { display: none; } }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #c5cde0; border-radius: 3px; }
@@ -623,6 +660,38 @@
       </div>
     </div>
 
+    <!-- Desktop stat summary cards (hidden on mobile — mobile has its own) -->
+    <div class="desk-stats-grid">
+      <div class="desk-stat-card total">
+        <div class="desk-stat-icon">📋</div>
+        <div class="desk-stat-body">
+          <div class="desk-stat-val" id="deskStatTotal">0</div>
+          <div class="desk-stat-lbl">Total Complaints</div>
+        </div>
+      </div>
+      <div class="desk-stat-card accepted">
+        <div class="desk-stat-icon">✅</div>
+        <div class="desk-stat-body">
+          <div class="desk-stat-val" id="deskStatAccepted">0</div>
+          <div class="desk-stat-lbl">Accepted</div>
+        </div>
+      </div>
+      <div class="desk-stat-card rejected">
+        <div class="desk-stat-icon">❌</div>
+        <div class="desk-stat-body">
+          <div class="desk-stat-val" id="deskStatRejected">0</div>
+          <div class="desk-stat-lbl">Rejected</div>
+        </div>
+      </div>
+      <div class="desk-stat-card pending">
+        <div class="desk-stat-icon">⏳</div>
+        <div class="desk-stat-body">
+          <div class="desk-stat-val" id="deskStatPending">0</div>
+          <div class="desk-stat-lbl">Pending</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Charts (shown on dashboard tab on mobile) -->
     <div class="section-title">📊 Analysis Dashboard</div>
     <div class="charts-grid" id="chartsGrid">
@@ -804,7 +873,7 @@
           <select id="fChannel">
             <option value="">— Select —</option>
             <option>FD</option><option>DB</option><option>FO</option>
-            <option>SH</option><option>OEM</option>
+            <option>SH</option><option>OEM</option><option>PR</option>
           </select>
         </div>
 
@@ -909,14 +978,25 @@ function switchTab(tab) {
   }
 }
 
-// ── UPDATE MOBILE STAT CARDS ───────────────────────────────
+// ── UPDATE STAT CARDS (mobile + desktop) ──────────────────
 function updateStatCards() {
-  const el = id => document.getElementById(id);
-  if (!el('statTotal')) return;
-  el('statTotal').textContent    = records.length;
-  el('statAccepted').textContent = records.filter(r => r.status === 'Accepted').length;
-  el('statRejected').textContent = records.filter(r => r.status === 'Rejected').length;
-  el('statPending').textContent  = records.filter(r => r.status === 'Pending').length;
+  const total    = records.length;
+  const accepted = records.filter(r => r.status === 'Accepted').length;
+  const rejected = records.filter(r => r.status === 'Rejected').length;
+  const pending  = records.filter(r => r.status === 'Pending').length;
+
+  // Mobile cards
+  const mel = id => document.getElementById(id);
+  if (mel('statTotal'))    mel('statTotal').textContent    = total;
+  if (mel('statAccepted')) mel('statAccepted').textContent = accepted;
+  if (mel('statRejected')) mel('statRejected').textContent = rejected;
+  if (mel('statPending'))  mel('statPending').textContent  = pending;
+
+  // Desktop cards
+  if (mel('deskStatTotal'))    mel('deskStatTotal').textContent    = total;
+  if (mel('deskStatAccepted')) mel('deskStatAccepted').textContent = accepted;
+  if (mel('deskStatRejected')) mel('deskStatRejected').textContent = rejected;
+  if (mel('deskStatPending'))  mel('deskStatPending').textContent  = pending;
 }
 
 // ── CONSTANTS ──────────────────────────────────────────────
@@ -1615,10 +1695,10 @@ function buildCharts() {
   charts.channel = new Chart(document.getElementById('chartChannel'), {
     type: 'doughnut',
     data: {
-      labels: ['FD', 'DB', 'FO', 'SH', 'OEM'],
+      labels: ['FD', 'DB', 'FO', 'SH', 'OEM', 'PR'],
       datasets: [{
-        data: [0, 0, 0, 0, 0],
-        backgroundColor: ['#4f8ef7', '#7c5af7', '#22c55e', '#f97316', '#ef4444'],
+        data: [0, 0, 0, 0, 0, 0],
+        backgroundColor: ['#4f8ef7', '#7c5af7', '#22c55e', '#f97316', '#ef4444', '#06b6d4'],
         borderColor: '#ffffff',
         borderWidth: 3,
         hoverOffset: 10
@@ -1827,8 +1907,8 @@ function refreshRootCauseMonthChart() {
 
 // 7. Channel-wise Pie Chart
 function refreshChannelChart() {
-  const CHANNELS = ['FD', 'DB', 'FO', 'SH', 'OEM'];
-  const counts = [0, 0, 0, 0, 0];
+  const CHANNELS = ['FD', 'DB', 'FO', 'SH', 'OEM', 'PR'];
+  const counts = [0, 0, 0, 0, 0, 0];
 
   records.forEach(r => {
     const idx = CHANNELS.indexOf((r.channel || '').toString().trim().toUpperCase());
