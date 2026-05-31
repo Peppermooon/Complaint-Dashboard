@@ -1019,14 +1019,57 @@ let nextId   = 1;
 let charts   = {};        // holds Chart instances
 
 // ── INIT ───────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  loadFromStorage();
+window.addEventListener('DOMContentLoaded', async () => {
   loadSheetUrlInput();
   initDatePicker();
   document.getElementById('chartRootCauseStatus').style.display = 'none';
   document.getElementById('chartRootCauseMonth').style.display  = 'none';
-  renderTable();
+
+  // ── Show loading state immediately ──
+  setSheetStatus('syncing', '⏳ Loading latest data from Google Sheets…');
+
+  // ── Build charts first (empty) so canvases are ready ──
   buildCharts();
+
+  // ── Try to load from Google Sheets first (always fresh) ──
+  let loadedFromSheets = false;
+  try {
+    const res  = await fetch(SHEETS_URL + '?action=getAll');
+    const data = await res.json();
+
+    if (data.success && data.records && data.records.length) {
+      records = data.records.map((r, i) => ({
+        id          : Date.now() + i,
+        complaintNo : r.complaintNo || (i + 1),
+        month       : r.month       || '',
+        code        : r.code        || '',
+        grade       : r.grade       || '',
+        size        : r.size        || '',
+        lot         : r.lot         || '',
+        location    : r.location    || '',
+        channel     : r.channel     || '',
+        salesLoc    : r.salesLoc    || '',
+        rootCause   : r.rootCause   || '',
+        status      : r.status      || 'Pending',
+        timestamp   : r.timestamp   || '',
+      }));
+      const maxNo = records.reduce((m, r) => Math.max(m, Number(r.complaintNo) || 0), 0);
+      nextId = maxNo + 1;
+      saveToStorage();   // sync localStorage with latest sheet data
+      loadedFromSheets = true;
+      setSheetStatus('connected', `✅ Loaded ${records.length} records from Google Sheets`);
+    } else {
+      throw new Error('Empty or failed response');
+    }
+  } catch (err) {
+    // ── Fallback to localStorage if Sheets unreachable ──
+    loadFromStorage();
+    setSheetStatus('error', '⚠️ Could not reach Sheets — showing cached data');
+    console.warn('Auto-load from Sheets failed, using localStorage:', err);
+  }
+
+  // ── Render everything ──
+  renderTable();
   refreshCharts();
   updateStatCards();
 });
