@@ -456,6 +456,60 @@
   .status-select.status-rejected { background-color: rgba(239,68,68,.15);  color: #b91c1c; }
   .status-select.status-pending  { background-color: rgba(249,115,22,.15); color: #c2410c; }
   .status-select option { background: #fff; color: var(--text); font-weight: 500; }
+
+  /* ===== DASHBOARD SUBTABS ===== */
+  .subtab-bar {
+    display: flex; gap: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .subtab-btn {
+    flex: 1; padding: 14px 10px;
+    border: none; background: transparent;
+    cursor: pointer; font-family: var(--font-body);
+    color: var(--muted);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    border-right: 1px solid var(--border);
+    transition: background .15s, color .15s;
+    position: relative;
+  }
+  .subtab-btn:last-child { border-right: none; }
+  .subtab-btn:hover { background: #f5f7fb; }
+  .subtab-btn .stb-val {
+    font-family: var(--font-head);
+    font-size: 26px; font-weight: 800; line-height: 1;
+  }
+  .subtab-btn .stb-lbl {
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 600;
+  }
+  .subtab-btn.active { background: #f5f7fb; }
+  .subtab-btn.active::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px; border-radius: 3px 3px 0 0;
+  }
+  .subtab-btn.st-all .stb-val { color: var(--accent);   }
+  .subtab-btn.st-acc .stb-val { color: var(--accepted); }
+  .subtab-btn.st-rej .stb-val { color: var(--rejected); }
+  .subtab-btn.st-pen .stb-val { color: var(--pending);  }
+  .subtab-btn.st-all.active::after { background: var(--accent);   }
+  .subtab-btn.st-acc.active::after { background: var(--accepted); }
+  .subtab-btn.st-rej.active::after { background: var(--rejected); }
+  .subtab-btn.st-pen.active::after { background: var(--pending);  }
+  .subtab-panel { display: none !important; }
+  .subtab-panel.sub-active { display: block !important; }
+  @media (max-width: 767px) {
+    .subtab-btn { padding: 10px 4px; }
+    .subtab-btn .stb-val { font-size: 18px; }
+    .subtab-btn .stb-lbl { font-size: 8px; }
+  }
+
   .desk-stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -679,153 +733,270 @@
       </div>
     </div>
 
-    <!-- Desktop stat summary cards (hidden on mobile — mobile has its own) -->
-    <div class="desk-stats-grid">
-      <div class="desk-stat-card total">
-        <div class="desk-stat-icon">📋</div>
-        <div class="desk-stat-body">
-          <div class="desk-stat-val" id="deskStatTotal">0</div>
-          <div class="desk-stat-lbl">Total Complaints</div>
-        </div>
-      </div>
-      <div class="desk-stat-card accepted">
-        <div class="desk-stat-icon">✅</div>
-        <div class="desk-stat-body">
-          <div class="desk-stat-val" id="deskStatAccepted">0</div>
-          <div class="desk-stat-lbl">Accepted</div>
-        </div>
-      </div>
-      <div class="desk-stat-card rejected">
-        <div class="desk-stat-icon">❌</div>
-        <div class="desk-stat-body">
-          <div class="desk-stat-val" id="deskStatRejected">0</div>
-          <div class="desk-stat-lbl">Rejected</div>
-        </div>
-      </div>
-      <div class="desk-stat-card pending">
-        <div class="desk-stat-icon">⏳</div>
-        <div class="desk-stat-body">
-          <div class="desk-stat-val" id="deskStatPending">0</div>
-          <div class="desk-stat-lbl">Pending</div>
-        </div>
-      </div>
+    <!-- ── SUBTAB BAR (replaces stat cards) ── -->
+    <div class="subtab-bar">
+      <button class="subtab-btn st-all active" id="stbAll" onclick="switchSubtab('all')">
+        <span class="stb-val" id="deskStatTotal">0</span>
+        <span class="stb-lbl">📋 All Complaints</span>
+      </button>
+      <button class="subtab-btn st-acc" id="stbAcc" onclick="switchSubtab('accepted')">
+        <span class="stb-val" id="deskStatAccepted">0</span>
+        <span class="stb-lbl">✅ Accepted</span>
+      </button>
+      <button class="subtab-btn st-rej" id="stbRej" onclick="switchSubtab('rejected')">
+        <span class="stb-val" id="deskStatRejected">0</span>
+        <span class="stb-lbl">❌ Rejected</span>
+      </button>
+      <button class="subtab-btn st-pen" id="stbPen" onclick="switchSubtab('pending')">
+        <span class="stb-val" id="deskStatPending">0</span>
+        <span class="stb-lbl">⏳ Pending</span>
+      </button>
     </div>
 
-    <!-- Charts (shown on dashboard tab on mobile) -->
-    <div class="section-title">📊 Analysis Dashboard</div>
-    <div class="charts-grid" id="chartsGrid">
+    <!-- ══ SUBTAB: ALL COMPLAINTS ══ -->
+    <div class="subtab-panel sub-active" id="sub-all">
+      <div class="section-title">📊 All Complaints — Analysis</div>
+      <div class="charts-grid">
 
-      <div class="chart-card">
-        <div class="chart-title"><span>📊</span> Month-wise Complaints</div>
-        <div class="chart-container"><canvas id="chartMonth"></canvas></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title"><span>📊</span> Month-wise Complaints by Status</div>
-        <div style="position:relative; width:100%; height:280px;">
-          <canvas id="chartMonthStacked"></canvas>
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Month-wise Complaints</div>
+          <div class="chart-container"><canvas id="chartMonth"></canvas></div>
         </div>
-      </div>
 
-      <div class="chart-card">
-        <div class="chart-title"><span>📉</span> Root Cause Pareto</div>
-        <div class="chart-container"><canvas id="chartPareto"></canvas></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title"><span>🥧</span> Status Distribution</div>
-        <div class="chart-container"><canvas id="chartStatus"></canvas></div>
-      </div>
-
-      <div class="chart-card">
-        <div class="chart-title"><span>📊</span> Size-wise Complaint Analysis by Status</div>
-        <div class="chart-filter-row">
-          <label class="filter-label">Root Cause:</label>
-          <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
-            <option value="">All Root Causes</option>
-            <option>Colour Variation</option>
-            <option>Lot, shade, type mixing</option>
-            <option>Position variation</option>
-            <option>Staining (polished)</option>
-            <option>Dirtiness (High rough)</option>
-            <option>Water mark</option>
-            <option>Cutting issue (80x120)</option>
-            <option>Flatness</option>
-            <option>Scratch marks</option>
-            <option>Cracked tiles</option>
-            <option>Chamfering issue</option>
-            <option>Others</option>
-            <option>Surface defect</option>
-            <option>Size variation</option>
-          </select>
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Month-wise Complaints by Status</div>
+          <div style="position:relative;width:100%;height:280px;">
+            <canvas id="chartMonthStacked"></canvas>
+          </div>
         </div>
-        <div style="position:relative; width:100%; height:280px;">
-          <canvas id="chartSize"></canvas>
-        </div>
-      </div>
 
-      <div class="chart-card">
-        <div class="chart-title"><span>🥧</span> Root Cause — Status Analysis</div>
-        <div class="chart-filter-row">
-          <label class="filter-label">Root Cause:</label>
-          <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
-            <option value="">— Select Root Cause —</option>
-            <option>Colour Variation</option>
-            <option>Lot, shade, type mixing</option>
-            <option>Position variation</option>
-            <option>Staining (polished)</option>
-            <option>Dirtiness (High rough)</option>
-            <option>Water mark</option>
-            <option>Cutting issue (80x120)</option>
-            <option>Flatness</option>
-            <option>Scratch marks</option>
-            <option>Cracked tiles</option>
-            <option>Chamfering issue</option>
-            <option>Others</option>
-            <option>Surface defect</option>
-            <option>Size variation</option>
-          </select>
+        <div class="chart-card">
+          <div class="chart-title"><span>📉</span> Root Cause Pareto</div>
+          <div class="chart-container"><canvas id="chartPareto"></canvas></div>
         </div>
-        <div style="position:relative; width:100%; height:260px;">
-          <canvas id="chartRootCauseStatus"></canvas>
-        </div>
-        <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
-      </div>
 
-      <div class="chart-card">
-        <div class="chart-title"><span>📊</span> Root Cause — Month-wise Analysis</div>
-        <div class="chart-filter-row">
-          <label class="filter-label">Root Cause:</label>
-          <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
-            <option value="">— Select Root Cause —</option>
-            <option>Colour Variation</option>
-            <option>Lot, shade, type mixing</option>
-            <option>Position variation</option>
-            <option>Staining (polished)</option>
-            <option>Dirtiness (High rough)</option>
-            <option>Water mark</option>
-            <option>Cutting issue (80x120)</option>
-            <option>Flatness</option>
-            <option>Scratch marks</option>
-            <option>Cracked tiles</option>
-            <option>Chamfering issue</option>
-            <option>Others</option>
-            <option>Surface defect</option>
-            <option>Size variation</option>
-          </select>
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Status Distribution</div>
+          <div class="chart-container"><canvas id="chartStatus"></canvas></div>
         </div>
-        <div style="position:relative; width:100%; height:260px;">
-          <canvas id="chartRootCauseMonth"></canvas>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Size-wise Complaint Analysis by Status</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
+              <option value="">All Root Causes</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:280px;">
+            <canvas id="chartSize"></canvas>
+          </div>
         </div>
-        <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
-      </div>
 
-      <div class="chart-card">
-        <div class="chart-title"><span>🥧</span> Channel-wise Complaint Analysis</div>
-        <div class="chart-container"><canvas id="chartChannel"></canvas></div>
-      </div>
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Root Cause — Status Analysis</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:260px;">
+            <canvas id="chartRootCauseStatus"></canvas>
+          </div>
+          <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
+        </div>
 
-    </div>
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Root Cause — Month-wise Analysis</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:260px;">
+            <canvas id="chartRootCauseMonth"></canvas>
+          </div>
+          <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Channel-wise Complaint Analysis</div>
+          <div class="chart-container"><canvas id="chartChannel"></canvas></div>
+        </div>
+
+      </div>
+    </div><!-- end sub-all -->
+
+    <!-- ══ SUBTAB: ACCEPTED ══ -->
+    <div class="subtab-panel" id="sub-accepted">
+      <div class="section-title" style="color:var(--accepted);">✅ Accepted Complaints — Analysis</div>
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Month-wise Accepted Complaints</div>
+          <div class="chart-container"><canvas id="chartMonthAcc"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📉</span> Root Cause Pareto — Accepted</div>
+          <div class="chart-container"><canvas id="chartParetoAcc"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Size-wise Accepted Complaints</div>
+          <div class="chart-container"><canvas id="chartSizeAcc"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Channel-wise Accepted Complaints</div>
+          <div class="chart-container"><canvas id="chartChannelAcc"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Root Cause — Month-wise (Accepted)</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthAcc" class="filter-select" onchange="refreshRCMonthFiltered('acc')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:260px;">
+            <canvas id="chartRCMonthAcc"></canvas>
+          </div>
+          <div id="rcMonthAccEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+
+      </div>
+    </div><!-- end sub-accepted -->
+
+    <!-- ══ SUBTAB: REJECTED ══ -->
+    <div class="subtab-panel" id="sub-rejected">
+      <div class="section-title" style="color:var(--rejected);">❌ Rejected Complaints — Analysis</div>
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Month-wise Rejected Complaints</div>
+          <div class="chart-container"><canvas id="chartMonthRej"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📉</span> Root Cause Pareto — Rejected</div>
+          <div class="chart-container"><canvas id="chartParetoRej"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Size-wise Rejected Complaints</div>
+          <div class="chart-container"><canvas id="chartSizeRej"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Channel-wise Rejected Complaints</div>
+          <div class="chart-container"><canvas id="chartChannelRej"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Root Cause — Month-wise (Rejected)</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthRej" class="filter-select" onchange="refreshRCMonthFiltered('rej')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:260px;">
+            <canvas id="chartRCMonthRej"></canvas>
+          </div>
+          <div id="rcMonthRejEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+
+      </div>
+    </div><!-- end sub-rejected -->
+
+    <!-- ══ SUBTAB: PENDING ══ -->
+    <div class="subtab-panel" id="sub-pending">
+      <div class="section-title" style="color:var(--pending);">⏳ Pending Complaints — Analysis</div>
+      <div class="charts-grid">
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Month-wise Pending Complaints</div>
+          <div class="chart-container"><canvas id="chartMonthPen"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📉</span> Root Cause Pareto — Pending</div>
+          <div class="chart-container"><canvas id="chartParetoPen"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Size-wise Pending Complaints</div>
+          <div class="chart-container"><canvas id="chartSizePen"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>🥧</span> Channel-wise Pending Complaints</div>
+          <div class="chart-container"><canvas id="chartChannelPen"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title"><span>📊</span> Root Cause — Month-wise (Pending)</div>
+          <div class="chart-filter-row">
+            <label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthPen" class="filter-select" onchange="refreshRCMonthFiltered('pen')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option>
+              <option>Position variation</option><option>Staining (polished)</option>
+              <option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option>
+              <option>Scratch marks</option><option>Cracked tiles</option>
+              <option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div style="position:relative;width:100%;height:260px;">
+            <canvas id="chartRCMonthPen"></canvas>
+          </div>
+          <div id="rcMonthPenEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+
+      </div>
+    </div><!-- end sub-pending -->
+
   </div><!-- end mob-dashboard -->
 
   <!-- ══════════════════════════════════
@@ -985,16 +1156,40 @@
 
 // ── MOBILE TAB NAVIGATION ──────────────────────────────────
 function switchTab(tab) {
-  // Hide all sections
   document.querySelectorAll('.mob-section').forEach(s => s.classList.remove('mob-active'));
   document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('mob-nav-active'));
-  // Show selected
   document.getElementById('mob-' + tab).classList.add('mob-active');
   document.getElementById('nav-' + tab).classList.add('mob-nav-active');
-  // Resize charts when switching to dashboard tab (canvas may have been hidden)
   if (tab === 'dashboard') {
     setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
   }
+}
+
+// ── DASHBOARD SUBTAB NAVIGATION ────────────────────────────
+const SUBTABS = ['all','accepted','rejected','pending'];
+const subtabBuilt = { acc: false, rej: false, pen: false };
+
+// Maps tab name → button ID suffix and key
+const TAB_BTN = { all:'All', accepted:'Acc', rejected:'Rej', pending:'Pen' };
+const TAB_KEY = { accepted:'acc', rejected:'rej', pending:'pen' };
+
+function switchSubtab(tab) {
+  // Toggle panels
+  SUBTABS.forEach(t => {
+    document.getElementById('sub-' + t).classList.toggle('sub-active', t === tab);
+    document.getElementById('stb' + TAB_BTN[t]).classList.toggle('active', t === tab);
+  });
+
+  const key = TAB_KEY[tab];
+  if (key) {
+    // Build charts on first visit
+    if (!subtabBuilt[key]) {
+      buildStatusCharts(key);
+      subtabBuilt[key] = true;
+    }
+    refreshStatusSubCharts(key);
+  }
+  setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
 }
 
 // ── UPDATE STAT CARDS (mobile + desktop) ──────────────────
@@ -1022,6 +1217,8 @@ function updateStatCards() {
 const STORAGE_KEY = 'cca_records_v1';
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
+const SIZES    = ['500x500','600x600','800x800','600x1200','800x1200'];
+const CHANNELS = ['FD','DB','FO','SH','OEM','PR'];
 const COLORS = {
   accepted : '#22c55e',
   rejected : '#ef4444',
@@ -1042,6 +1239,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   initDatePicker();
   document.getElementById('chartRootCauseStatus').style.display = 'none';
   document.getElementById('chartRootCauseMonth').style.display  = 'none';
+  // Hide RC month canvases for status subtabs
+  ['Acc','Rej','Pen'].forEach(k => {
+    const el = document.getElementById('chartRCMonth'+k);
+    if (el) el.style.display = 'none';
+  });
 
   // ── Show loading state immediately ──
   setSheetStatus('syncing', '⏳ Loading latest data from Google Sheets…');
@@ -1844,6 +2046,10 @@ function refreshCharts() {
   refreshRootCauseStatusChart();
   refreshRootCauseMonthChart();
   refreshChannelChart();
+  // Refresh status subtab charts if already built
+  ['acc','rej','pen'].forEach(key => {
+    if (subtabBuilt && subtabBuilt[key]) refreshStatusSubCharts(key);
+  });
 }
 
 function refreshMonthChart() {
@@ -1908,7 +2114,6 @@ function refreshStatusChart() {
 }
 
 function refreshSizeChart() {
-  const SIZES = ['500x500', '600x600', '800x800', '600x1200', '800x1200'];
   const acc = [0, 0, 0, 0, 0];
   const rej = [0, 0, 0, 0, 0];
   const pen = [0, 0, 0, 0, 0];
@@ -2008,16 +2213,155 @@ function refreshRootCauseMonthChart() {
 
 // 7. Channel-wise Pie Chart
 function refreshChannelChart() {
-  const CHANNELS = ['FD', 'DB', 'FO', 'SH', 'OEM', 'PR'];
   const counts = [0, 0, 0, 0, 0, 0];
-
   records.forEach(r => {
     const idx = CHANNELS.indexOf((r.channel || '').toString().trim().toUpperCase());
     if (idx !== -1) counts[idx]++;
   });
-
   charts.channel.data.datasets[0].data = counts;
   charts.channel.update();
+}
+
+// ── STATUS SUBTAB CHARTS ────────────────────────────────────
+// key = 'acc' | 'rej' | 'pen'
+const STATUS_MAP = { acc:'Accepted', rej:'Rejected', pen:'Pending' };
+const STATUS_COL = { acc:'#22c55e',  rej:'#ef4444',  pen:'#f97316' };
+
+function buildStatusCharts(key) {
+  const col   = STATUS_COL[key];
+
+  // Month-wise column
+  charts['month_'+key] = new Chart(document.getElementById('chartMonth'+key.charAt(0).toUpperCase()+key.slice(1)), {
+    type:'bar',
+    data:{ labels:MONTHS, datasets:[{ label:'Complaints', data:new Array(12).fill(0),
+      backgroundColor:col, borderRadius:5, borderSkipped:false }]},
+    options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
+      plugins:{ legend:{display:false},
+        datalabels:{anchor:'end',align:'end',color:'#1a1f2e',font:{weight:'700',size:11},formatter:v=>v>0?v:''}},
+      scales:{x:{grid:{color:gridColor}}, y:{beginAtZero:true,grid:{color:gridColor},ticks:{stepSize:1,precision:0},grace:'15%'}}}
+  });
+
+  // Pareto
+  charts['pareto_'+key] = new Chart(document.getElementById('chartPareto'+key.charAt(0).toUpperCase()+key.slice(1)), {
+    data:{ labels:[], datasets:[
+      { type:'bar', label:'Count', data:[], backgroundColor:col, borderRadius:5, yAxisID:'y',
+        datalabels:{anchor:'end',align:'end',color:'#1a1f2e',font:{weight:'700',size:11},formatter:v=>v>0?v:''}},
+      { type:'line', label:'Cumulative %', data:[], borderColor:'#f97316', backgroundColor:'transparent',
+        pointBackgroundColor:'#f97316', tension:.3, yAxisID:'y2', pointRadius:4,
+        datalabels:{display:false}}
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:20,right:10}},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14}},datalabels:{}},
+      scales:{x:{grid:{color:gridColor}},
+        y:{grid:{color:gridColor},beginAtZero:true,ticks:{stepSize:1},grace:'20%'},
+        y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{callback:v=>v+'%'}}}}
+  });
+
+  // Size-wise simple column
+  charts['size_'+key] = new Chart(document.getElementById('chartSize'+key.charAt(0).toUpperCase()+key.slice(1)), {
+    type:'bar',
+    data:{ labels:SIZES, datasets:[{ label:'Complaints', data:new Array(5).fill(0),
+      backgroundColor:col, borderRadius:5, borderSkipped:false }]},
+    options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
+      plugins:{legend:{display:false},
+        datalabels:{anchor:'end',align:'end',color:'#1a1f2e',font:{weight:'700',size:11},formatter:v=>v>0?v:''}},
+      scales:{x:{grid:{color:gridColor}}, y:{beginAtZero:true,grid:{color:gridColor},ticks:{stepSize:1,precision:0},grace:'15%'}}}
+  });
+
+  // Channel pie
+  charts['channel_'+key] = new Chart(document.getElementById('chartChannel'+key.charAt(0).toUpperCase()+key.slice(1)), {
+    type:'doughnut',
+    data:{ labels:CHANNELS, datasets:[{ data:new Array(6).fill(0),
+      backgroundColor:['#4f8ef7','#7c5af7','#22c55e','#f97316','#ef4444','#06b6d4'],
+      borderColor:'#ffffff', borderWidth:3, hoverOffset:10 }]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom',labels:{boxWidth:14,padding:14}},
+        tooltip:{callbacks:{label:ctx=>{
+          const sum=ctx.dataset.data.reduce((a,b)=>a+b,0);
+          const pct=sum?((ctx.parsed/sum)*100).toFixed(1):0;
+          return ` ${ctx.label}: ${ctx.parsed} (${pct}%)`;}}},
+        datalabels:{color:'#fff',font:{weight:'700',size:11},
+          formatter:(v,ctx)=>{
+            const sum=ctx.dataset.data.reduce((a,b)=>a+b,0);
+            if(!v||!sum) return '';
+            return `${ctx.chart.data.labels[ctx.dataIndex]}\n${v} (${((v/sum)*100).toFixed(1)}%)`;}}},
+      cutout:'50%'}
+  });
+
+  // RC Month filtered
+  charts['rcmonth_'+key] = new Chart(document.getElementById('chartRCMonth'+key.charAt(0).toUpperCase()+key.slice(1)), {
+    type:'bar',
+    data:{ labels:MONTHS, datasets:[{ label:'Complaints', data:new Array(12).fill(0),
+      backgroundColor:col, borderRadius:5, borderSkipped:false }]},
+    options:{ responsive:true, maintainAspectRatio:false, layout:{padding:{top:20}},
+      plugins:{legend:{display:false},
+        datalabels:{anchor:'end',align:'end',color:'#1a1f2e',font:{weight:'700',size:11},formatter:v=>v>0?v:''}},
+      scales:{x:{grid:{color:gridColor}}, y:{beginAtZero:true,grid:{color:gridColor},ticks:{stepSize:1,precision:0},grace:'15%'}}}
+  });
+}
+
+function refreshStatusSubCharts(key) {
+  const status  = STATUS_MAP[key];
+  const keyU    = key.charAt(0).toUpperCase()+key.slice(1);
+  const filtered = records.filter(r => r.status === status);
+
+  // Month
+  const mCounts = new Array(12).fill(0);
+  filtered.forEach(r => { const i=MONTHS.indexOf(r.month); if(i!==-1) mCounts[i]++; });
+  charts['month_'+key].data.datasets[0].data = mCounts;
+  charts['month_'+key].update();
+
+  // Pareto
+  const rCounts = {};
+  filtered.forEach(r => { if(r.rootCause) rCounts[r.rootCause]=(rCounts[r.rootCause]||0)+1; });
+  const sorted = Object.entries(rCounts).sort((a,b)=>b[1]-a[1]);
+  const pLabels = sorted.map(e=>e[0]);
+  const pVals   = sorted.map(e=>e[1]);
+  const pTotal  = pVals.reduce((a,b)=>a+b,0);
+  let cum=0;
+  const cumPct  = pVals.map(v=>{ cum+=v; return pTotal?+((cum/pTotal)*100).toFixed(1):0; });
+  charts['pareto_'+key].data.labels = pLabels;
+  charts['pareto_'+key].data.datasets[0].data = pVals;
+  charts['pareto_'+key].data.datasets[1].data = cumPct;
+  charts['pareto_'+key].update();
+
+  // Size
+  const sCounts = new Array(5).fill(0);
+  filtered.forEach(r => {
+    if(!r.size) return;
+    const norm = r.size.toString().trim().toLowerCase().replace(/x/gi,'x');
+    const i = SIZES.indexOf(norm); if(i!==-1) sCounts[i]++;
+  });
+  charts['size_'+key].data.datasets[0].data = sCounts;
+  charts['size_'+key].update();
+
+  // Channel
+  const cCounts = new Array(6).fill(0);
+  filtered.forEach(r => {
+    const i = CHANNELS.indexOf((r.channel||'').toString().trim().toUpperCase());
+    if(i!==-1) cCounts[i]++;
+  });
+  charts['channel_'+key].data.datasets[0].data = cCounts;
+  charts['channel_'+key].update();
+}
+
+// RC Month filtered per status subtab
+function refreshRCMonthFiltered(key) {
+  const keyU    = key.charAt(0).toUpperCase()+key.slice(1);
+  const status  = STATUS_MAP[key];
+  const chosen  = document.getElementById('filterRootCauseMonth'+keyU)?.value;
+  const emptyEl = document.getElementById('rcMonth'+keyU+'Empty');
+  const canvas  = document.getElementById('chartRCMonth'+keyU);
+  if (!chosen) {
+    canvas.style.display='none'; emptyEl.style.display='block'; return;
+  }
+  const counts = new Array(12).fill(0);
+  records.filter(r=>r.status===status && r.rootCause===chosen)
+    .forEach(r=>{ const i=MONTHS.indexOf(r.month); if(i!==-1) counts[i]++; });
+  charts['rcmonth_'+key].data.datasets[0].data = counts;
+  charts['rcmonth_'+key].data.datasets[0].label = chosen;
+  canvas.style.display='block'; emptyEl.style.display='none';
+  charts['rcmonth_'+key].update();
 }
 
 // ── EXPORT CSV ─────────────────────────────────────────────
