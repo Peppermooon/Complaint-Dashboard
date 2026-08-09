@@ -271,6 +271,51 @@
     font-style: italic;
   }
 
+  /* ===== ROOT CAUSE MATRIX (Code-wise / Size-wise) ===== */
+  .matrix-card { grid-column: 1 / -1; }
+  .matrix-wrap {
+    overflow: auto;
+    max-height: 420px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table.matrix-table {
+    border-collapse: collapse;
+    font-size: 12px;
+    width: 100%;
+  }
+  table.matrix-table th, table.matrix-table td {
+    padding: 8px 12px;
+    text-align: center;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  table.matrix-table thead th {
+    background: #eef2fb;
+    font-family: var(--font-head);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    position: sticky; top: 0; z-index: 2;
+  }
+  table.matrix-table td:first-child,
+  table.matrix-table th:first-child {
+    position: sticky; left: 0; z-index: 3;
+    background: #eef2fb;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text);
+  }
+  table.matrix-table thead th:first-child { z-index: 4; }
+  table.matrix-table .mx-total {
+    font-weight: 700;
+    background: #f5f7fb !important;
+    color: var(--text);
+  }
+  table.matrix-table .mx-empty-cell { color: #c7cede; }
+
   /* ===== EMPTY STATE ===== */
   .empty-state {
     text-align: center; padding: 40px 20px;
@@ -847,6 +892,16 @@
           <div class="chart-container"><canvas id="chartChannel"></canvas></div>
         </div>
 
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis</div>
+          <div id="matrixCodeAll"></div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis</div>
+          <div id="matrixSizeAll"></div>
+        </div>
+
       </div>
     </div><!-- end sub-all -->
 
@@ -894,6 +949,16 @@
             <canvas id="chartRCMonthAcc"></canvas>
           </div>
           <div id="rcMonthAccEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Accepted</div>
+          <div id="matrixCodeAcc"></div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Accepted</div>
+          <div id="matrixSizeAcc"></div>
         </div>
 
       </div>
@@ -945,6 +1010,16 @@
           <div id="rcMonthRejEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
         </div>
 
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Rejected</div>
+          <div id="matrixCodeRej"></div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Rejected</div>
+          <div id="matrixSizeRej"></div>
+        </div>
+
       </div>
     </div><!-- end sub-rejected -->
 
@@ -992,6 +1067,16 @@
             <canvas id="chartRCMonthPen"></canvas>
           </div>
           <div id="rcMonthPenEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Pending</div>
+          <div id="matrixCodePen"></div>
+        </div>
+
+        <div class="chart-card matrix-card">
+          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Pending</div>
+          <div id="matrixSizePen"></div>
         </div>
 
       </div>
@@ -2046,10 +2131,90 @@ function refreshCharts() {
   refreshRootCauseStatusChart();
   refreshRootCauseMonthChart();
   refreshChannelChart();
+  refreshMatrices(null, 'All');
   // Refresh status subtab charts if already built
   ['acc','rej','pen'].forEach(key => {
     if (subtabBuilt && subtabBuilt[key]) refreshStatusSubCharts(key);
   });
+}
+
+// ── CODE-WISE / SIZE-WISE ROOT CAUSE MATRICES ──────────────
+// Renders an HTML cross-tab: rows = code/size, columns = root cause.
+// Rows and columns are sorted by their totals (descending) so the
+// cell with the highest concentration of complaints lands top-left.
+function buildMatrixHTML(containerId, recs, rowKey, rowLabel) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!recs.length) {
+    container.innerHTML = `<div class="chart-empty">No data available for this matrix.</div>`;
+    return;
+  }
+
+  const rowTotals = {};
+  const colTotals = {};
+  const matrix = {};
+
+  recs.forEach(r => {
+    const rowVal = (r[rowKey] || '').toString().trim();
+    const colVal = (r.rootCause || '').toString().trim();
+    if (!rowVal || !colVal) return;
+    matrix[rowVal] = matrix[rowVal] || {};
+    matrix[rowVal][colVal] = (matrix[rowVal][colVal] || 0) + 1;
+    rowTotals[rowVal] = (rowTotals[rowVal] || 0) + 1;
+    colTotals[colVal] = (colTotals[colVal] || 0) + 1;
+  });
+
+  const rows = Object.keys(rowTotals).sort((a, b) => rowTotals[b] - rowTotals[a]);
+  const cols = Object.keys(colTotals).sort((a, b) => colTotals[b] - colTotals[a]);
+
+  if (!rows.length || !cols.length) {
+    container.innerHTML = `<div class="chart-empty">No data available for this matrix.</div>`;
+    return;
+  }
+
+  let maxVal = 0;
+  rows.forEach(r => cols.forEach(c => {
+    const v = (matrix[r] && matrix[r][c]) || 0;
+    if (v > maxVal) maxVal = v;
+  }));
+
+  let html = `<div class="matrix-wrap"><table class="matrix-table"><thead><tr><th>${rowLabel}</th>`;
+  cols.forEach(c => { html += `<th>${c}</th>`; });
+  html += `<th class="mx-total">Total</th></tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    html += `<tr><td>${r}</td>`;
+    cols.forEach(c => {
+      const v = (matrix[r] && matrix[r][c]) || 0;
+      if (v > 0) {
+        const ratio = maxVal ? v / maxVal : 0;
+        const bg = `rgba(26,95,212,${(0.10 + ratio * 0.62).toFixed(2)})`;
+        const fg = ratio > 0.55 ? '#ffffff' : '#1a1f2e';
+        const fw = ratio > 0.30 ? 700 : 500;
+        html += `<td style="background:${bg};color:${fg};font-weight:${fw};">${v}</td>`;
+      } else {
+        html += `<td><span class="mx-empty-cell">–</span></td>`;
+      }
+    });
+    html += `<td class="mx-total">${rowTotals[r]}</td></tr>`;
+  });
+
+  html += `<tr><td class="mx-total">Total</td>`;
+  cols.forEach(c => { html += `<td class="mx-total">${colTotals[c]}</td>`; });
+  const grandTotal = Object.values(rowTotals).reduce((a, b) => a + b, 0);
+  html += `<td class="mx-total">${grandTotal}</td></tr>`;
+
+  html += `</tbody></table></div>`;
+  container.innerHTML = html;
+}
+
+// statusFilter: null (all) or 'Accepted' | 'Rejected' | 'Pending'
+// suffix: 'All' | 'Acc' | 'Rej' | 'Pen' — matches the container id suffix
+function refreshMatrices(statusFilter, suffix) {
+  const filtered = statusFilter ? records.filter(r => r.status === statusFilter) : records;
+  buildMatrixHTML('matrixCode' + suffix, filtered, 'code', 'Code');
+  buildMatrixHTML('matrixSize' + suffix, filtered, 'size', 'Size');
 }
 
 function refreshMonthChart() {
@@ -2343,6 +2508,9 @@ function refreshStatusSubCharts(key) {
   });
   charts['channel_'+key].data.datasets[0].data = cCounts;
   charts['channel_'+key].update();
+
+  // Code-wise / Size-wise root cause matrices
+  refreshMatrices(status, keyU);
 }
 
 // RC Month filtered per status subtab
