@@ -315,6 +315,25 @@
     color: var(--text);
   }
   table.matrix-table .mx-empty-cell { color: #c7cede; }
+  .matrix-title-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin-bottom: 18px;
+  }
+  .matrix-title-row .chart-title { margin-bottom: 0; }
+  .mx-download-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 11px; font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .mx-download-btn:hover { border-color: var(--accent); color: var(--accent); background: #e8f0fe; }
 
   /* ===== EMPTY STATE ===== */
   .empty-state {
@@ -595,6 +614,43 @@
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #c5cde0; border-radius: 3px; }
 
+  /* ===== TOP-LEVEL TAB SECTIONS (Dashboard / Add / Records) ===== */
+  /* Applies at every width — desktop now uses a tab bar instead of stacking all sections */
+  .mob-section { display: none; }
+  .mob-section.mob-active { display: block; }
+
+  /* ===== DESKTOP TOP-LEVEL TAB BAR ===== */
+  .desk-tab-bar {
+    display: flex; gap: 0;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .desk-tab-btn {
+    flex: 1; padding: 15px 20px;
+    border: none; background: transparent;
+    cursor: pointer; font-family: var(--font-head);
+    font-weight: 700; font-size: 13px;
+    letter-spacing: .03em;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    transition: background .15s, color .15s;
+    position: relative;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .desk-tab-btn:last-child { border-right: none; }
+  .desk-tab-btn:hover { background: #f5f7fb; color: var(--accent); }
+  .desk-tab-btn.active { background: #f5f7fb; color: var(--accent); }
+  .desk-tab-btn.active::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px; background: var(--accent);
+    border-radius: 3px 3px 0 0;
+  }
+
   /* ═══════════════════════════════════════════════
      MOBILE UI — screens < 768px
   ═══════════════════════════════════════════════ */
@@ -616,9 +672,7 @@
     /* ── Main ── */
     main { padding: 12px 12px 20px; }
 
-    /* ── Mobile tab sections — hide all, show active ── */
-    .mob-section { display: none; }
-    .mob-section.mob-active { display: block; }
+    /* ── Mobile tab sections — hide all, show active (see global rule above) ── */
 
     /* ── Stat summary cards row (Dashboard tab) ── */
     .mob-stats-grid {
@@ -717,10 +771,9 @@
     .desk-only { display: none !important; }
   }
 
-  /* ── Hide mobile nav on desktop ── */
+  /* ── Hide mobile bottom nav on desktop (desktop uses the top tab bar instead) ── */
   @media (min-width: 768px) {
     .mob-nav     { display: none !important; }
-    .mob-section { display: block !important; }
     .mob-stats-grid { display: none !important; }
   }
 </style>
@@ -738,6 +791,16 @@
 
 <!-- ===== MAIN ===== -->
 <main>
+
+  <!-- ══════════════════════════════════
+       DESKTOP TOP-LEVEL TAB BAR
+       (hidden on mobile — mobile uses the bottom nav bar instead)
+  ══════════════════════════════════ -->
+  <nav class="desk-tab-bar desk-only">
+    <button class="desk-tab-btn active" id="dtab-dashboard" onclick="switchTab('dashboard')">📊 Dashboard</button>
+    <button class="desk-tab-btn" id="dtab-add" onclick="switchTab('add')">➕ Add Complaint Record</button>
+    <button class="desk-tab-btn" id="dtab-records" onclick="switchTab('records')">📄 Complaint Records</button>
+  </nav>
 
   <!-- ══════════════════════════════════
        MOBILE: DASHBOARD TAB (Home)
@@ -893,12 +956,18 @@
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeAll','code_wise_root_cause_all.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixCodeAll"></div>
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeAll','size_wise_root_cause_all.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixSizeAll"></div>
         </div>
 
@@ -952,12 +1021,18 @@
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Accepted</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Accepted</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeAcc','code_wise_root_cause_accepted.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixCodeAcc"></div>
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Accepted</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Accepted</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeAcc','size_wise_root_cause_accepted.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixSizeAcc"></div>
         </div>
 
@@ -1011,12 +1086,18 @@
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Rejected</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Rejected</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeRej','code_wise_root_cause_rejected.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixCodeRej"></div>
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Rejected</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Rejected</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeRej','size_wise_root_cause_rejected.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixSizeRej"></div>
         </div>
 
@@ -1070,12 +1151,18 @@
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Pending</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>🔠</span> Code-wise Root Cause Analysis — Pending</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodePen','code_wise_root_cause_pending.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixCodePen"></div>
         </div>
 
         <div class="chart-card matrix-card">
-          <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Pending</div>
+          <div class="matrix-title-row">
+            <div class="chart-title"><span>📐</span> Size-wise Root Cause Analysis — Pending</div>
+            <button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizePen','size_wise_root_cause_pending.csv')">⬇ CSV</button>
+          </div>
           <div id="matrixSizePen"></div>
         </div>
 
@@ -1243,8 +1330,11 @@
 function switchTab(tab) {
   document.querySelectorAll('.mob-section').forEach(s => s.classList.remove('mob-active'));
   document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('mob-nav-active'));
+  document.querySelectorAll('.desk-tab-btn').forEach(n => n.classList.remove('active'));
   document.getElementById('mob-' + tab).classList.add('mob-active');
   document.getElementById('nav-' + tab).classList.add('mob-nav-active');
+  const dtab = document.getElementById('dtab-' + tab);
+  if (dtab) dtab.classList.add('active');
   if (tab === 'dashboard') {
     setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
   }
@@ -2142,12 +2232,16 @@ function refreshCharts() {
 // Renders an HTML cross-tab: rows = code/size, columns = root cause.
 // Rows and columns are sorted by their totals (descending) so the
 // cell with the highest concentration of complaints lands top-left.
+// Cache of the last-rendered matrix data, keyed by container id — used for CSV export
+const matrixDataCache = {};
+
 function buildMatrixHTML(containerId, recs, rowKey, rowLabel) {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   if (!recs.length) {
     container.innerHTML = `<div class="chart-empty">No data available for this matrix.</div>`;
+    matrixDataCache[containerId] = null;
     return;
   }
 
@@ -2170,8 +2264,11 @@ function buildMatrixHTML(containerId, recs, rowKey, rowLabel) {
 
   if (!rows.length || !cols.length) {
     container.innerHTML = `<div class="chart-empty">No data available for this matrix.</div>`;
+    matrixDataCache[containerId] = null;
     return;
   }
+
+  matrixDataCache[containerId] = { rows, cols, matrix, rowTotals, colTotals, rowLabel };
 
   let maxVal = 0;
   rows.forEach(r => cols.forEach(c => {
@@ -2207,6 +2304,31 @@ function buildMatrixHTML(containerId, recs, rowKey, rowLabel) {
 
   html += `</tbody></table></div>`;
   container.innerHTML = html;
+}
+
+// Download a previously-built matrix as a CSV file
+function downloadMatrixCSV(containerId, filename) {
+  const data = matrixDataCache[containerId];
+  if (!data) { showToast('No data to export for this matrix.', '#f97316'); return; }
+
+  const { rows, cols, matrix, rowTotals, colTotals, rowLabel } = data;
+  const esc = v => `"${String(v).replace(/"/g, '""')}"`;
+
+  const headerRow = [rowLabel, ...cols, 'Total'].map(esc).join(',');
+  const bodyRows = rows.map(r => {
+    const cells = cols.map(c => (matrix[r] && matrix[r][c]) || 0);
+    return [esc(r), ...cells, rowTotals[r]].join(',');
+  });
+  const grandTotal = Object.values(rowTotals).reduce((a, b) => a + b, 0);
+  const totalRow = [esc('Total'), ...cols.map(c => colTotals[c]), grandTotal].join(',');
+
+  const csv = [headerRow, ...bodyRows, totalRow].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  showToast('⬇ Matrix exported as CSV!');
 }
 
 // statusFilter: null (all) or 'Accepted' | 'Rejected' | 'Pending'
