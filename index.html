@@ -658,19 +658,21 @@
 
     /* ── Header ── */
     .site-header {
-      height: 56px; padding: 0 16px; gap: 10px;
+      height: 52px; padding: 0 12px; gap: 8px;
+      flex-direction: row; align-items: center;
     }
     .site-header h1 {
-      font-size: 13px; white-space: normal; line-height: 1.2;
+      font-size: 12px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
     }
     .date-wrap label { display: none; }
-    .date-wrap input[type="date"] { font-size: 11px; padding: 5px 8px; }
+    .date-wrap input[type="date"] { font-size: 11px; padding: 4px 7px; }
 
     /* ── Body padding for bottom nav ── */
-    body { padding-bottom: 70px; }
+    body { padding-bottom: 66px; }
 
     /* ── Main ── */
-    main { padding: 12px 12px 20px; }
+    main { padding: 10px 10px 16px; }
 
     /* ── Mobile tab sections — hide all, show active (see global rule above) ── */
 
@@ -720,10 +722,27 @@
     .section-title { font-size: 11px; margin-bottom: 12px; }
 
     /* ── Charts: single column, shorter ── */
-    .charts-grid { grid-template-columns: 1fr; gap: 14px; }
-    .chart-container { height: 220px; }
-    .chart-card { padding: 14px 12px; }
-    .chart-title { font-size: 12px; margin-bottom: 12px; }
+    .charts-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    .chart-container { height: 200px !important; }
+    .chart-card { padding: 12px 10px; }
+    .chart-title { font-size: 11px; margin-bottom: 10px; }
+    /* Override any inline height styles on chart wrappers */
+    .chart-card > div[style*="height"] { height: 200px !important; }
+    .chart-card > div[style*="280"] { height: 200px !important; }
+    .chart-card > div[style*="260"] { height: 200px !important; }
+    .chart-card > div[style*="300"] { height: 200px !important; }
+    /* Make filter selects full width on mobile */
+    .chart-filter-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .filter-select { min-width: 100%; width: 100%; }
+    /* Matrix cards compact */
+    .matrix-card { padding: 12px 10px; margin-top: 12px !important; }
+    .matrix-wrap { max-height: 300px; }
+    table.matrix-table th, table.matrix-table td { padding: 5px 8px; font-size: 10px; }
+    /* Subtab bar compact */
+    .subtab-bar { margin-bottom: 14px; }
+    .subtab-btn { padding: 8px 4px; }
+    .subtab-btn .stb-val { font-size: 16px; }
+    .subtab-btn .stb-lbl { font-size: 7px; letter-spacing: .03em; }
 
     /* ── Table: horizontal scroll, compact ── */
     .table-wrap { max-height: 360px; }
@@ -1327,6 +1346,27 @@
    ============================================================ */
 
 // ── MOBILE TAB NAVIGATION ──────────────────────────────────
+// ── MOBILE CHART HEIGHT FIX ────────────────────────────────
+function fixMobileChartHeights() {
+  if (window.innerWidth >= 768) return; // desktop only uses CSS
+  const H = 200;
+  document.querySelectorAll('.chart-card > div[style]').forEach(el => {
+    el.style.height = H + 'px';
+  });
+  document.querySelectorAll('.chart-container').forEach(el => {
+    el.style.height = H + 'px';
+  });
+  setTimeout(() => {
+    Object.values(charts).forEach(c => { if (c && c.resize) c.resize(); });
+  }, 50);
+}
+
+// Re-fix on orientation change / resize
+window.addEventListener('resize', () => {
+  fixMobileChartHeights();
+  setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 100);
+});
+
 function switchTab(tab) {
   document.querySelectorAll('.mob-section').forEach(s => s.classList.remove('mob-active'));
   document.querySelectorAll('.mob-nav-item').forEach(n => n.classList.remove('mob-nav-active'));
@@ -1336,7 +1376,10 @@ function switchTab(tab) {
   const dtab = document.getElementById('dtab-' + tab);
   if (dtab) dtab.classList.add('active');
   if (tab === 'dashboard') {
-    setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
+    setTimeout(() => {
+      fixMobileChartHeights();
+      Object.values(charts).forEach(c => c && c.resize && c.resize());
+    }, 80);
   }
 }
 
@@ -1364,7 +1407,10 @@ function switchSubtab(tab) {
     }
     refreshStatusSubCharts(key);
   }
-  setTimeout(() => { Object.values(charts).forEach(c => c && c.resize && c.resize()); }, 80);
+  setTimeout(() => {
+    fixMobileChartHeights();
+    Object.values(charts).forEach(c => c && c.resize && c.resize());
+  }, 80);
 }
 
 // ── UPDATE STAT CARDS (mobile + desktop) ──────────────────
@@ -1467,6 +1513,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   renderTable();
   refreshCharts();
   updateStatCards();
+  fixMobileChartHeights();
 });
 
 // ── DATE PICKER ────────────────────────────────────────────
