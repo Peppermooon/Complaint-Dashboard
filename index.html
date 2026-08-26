@@ -138,6 +138,26 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
 }
 .filter-clear-btn:hover{border-color:var(--rejected);color:var(--rejected)}
 
+
+/* ===== RESTORED ORIGINAL ANALYSIS ELEMENTS ===== */
+.chart-filter-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.filter-select{flex:1;min-width:180px;padding:6px 10px;font-size:12px}
+.chart-empty{text-align:center;padding:18px 12px;font-size:12px;color:var(--muted);font-style:italic}
+.matrix-card{grid-column:1/-1}
+.matrix-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.matrix-title-row .chart-title{margin-bottom:0}
+.matrix-wrap{overflow:auto;max-height:420px;border-radius:10px;border:1px solid var(--border)}
+table.matrix-table{border-collapse:collapse;font-size:12px;width:100%}
+table.matrix-table th,table.matrix-table td{padding:8px 12px;text-align:center;border:1px solid var(--border);white-space:nowrap}
+table.matrix-table thead th{background:#eef2fb;font-family:var(--font-head);font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);position:sticky;top:0;z-index:2}
+table.matrix-table td:first-child,table.matrix-table th:first-child{position:sticky;left:0;z-index:3;background:#eef2fb;text-align:left;font-weight:700;color:var(--text)}
+table.matrix-table .mx-total{font-weight:700;background:#f5f7fb!important;color:var(--text)}
+table.matrix-table .mx-empty-cell{color:#c7cede}
+.mx-download-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:11px;font-weight:600;padding:6px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.mx-mobile-hint{display:none}
+@media(max-width:767px){.matrix-title-row{flex-direction:column;align-items:stretch}.mx-download-btn{width:100%;justify-content:center}.mx-mobile-hint{display:block;font-size:10px;color:var(--muted);text-align:center;padding:6px 0 2px;font-style:italic}}
+
 #toast{position:fixed;bottom:28px;right:28px;background:var(--accepted);color:#fff;padding:12px 22px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(12px);transition:.3s;pointer-events:none;z-index:999}
 #toast.show{opacity:1;transform:translateY(0)}
 .mob-nav{display:none}
@@ -191,10 +211,68 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
       <div class="section-title">📊 All Complaints — Analysis</div>
       <div class="charts-grid">
         <div class="chart-card"><div class="chart-title">📊 Month-wise Complaints</div><div class="chart-container"><canvas id="chartMonth"></canvas></div></div>
-        <div class="chart-card"><div class="chart-title">🥧 Status Distribution</div><div class="chart-container"><canvas id="chartStatus"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">📊 Month-wise Complaints by Status</div><div class="chart-container"><canvas id="chartMonthStacked"></canvas></div></div>
         <div class="chart-card"><div class="chart-title">📉 Root Cause Pareto</div><div class="chart-container"><canvas id="chartPareto"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">🥧 Status Distribution</div><div class="chart-container"><canvas id="chartStatus"></canvas></div></div>
+
+        <div class="chart-card">
+          <div class="chart-title">📊 Size-wise Complaint Analysis by Status</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
+              <option value="">All Root Causes</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartSize"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">🥧 Root Cause — Status Analysis</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartRootCauseStatus"></canvas></div>
+          <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">📊 Root Cause — Month-wise Analysis</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartRootCauseMonth"></canvas></div>
+          <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
+        </div>
+
         <div class="chart-card"><div class="chart-title">🥧 Channel-wise Complaint Analysis</div><div class="chart-container"><canvas id="chartChannel"></canvas></div></div>
         <div class="chart-card action-chart-card"><div class="chart-title">🎯 Action Plan Analysis — All Decided Complaints</div><div class="chart-container"><canvas id="chartActionAll"></canvas></div></div>
+
+        <div class="chart-card matrix-card">
+          <div class="matrix-title-row"><div class="chart-title">🔠 Code-wise Root Cause Analysis</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeAll','code_wise_root_cause_all.csv')">⬇ CSV</button></div>
+          <div id="matrixCodeAll"></div>
+        </div>
+        <div class="chart-card matrix-card">
+          <div class="matrix-title-row"><div class="chart-title">📐 Size-wise Root Cause Analysis</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeAll','size_wise_root_cause_all.csv')">⬇ CSV</button></div>
+          <div id="matrixSizeAll"></div>
+        </div>
       </div>
     </div>
 
@@ -203,7 +281,26 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
       <div class="charts-grid">
         <div class="chart-card"><div class="chart-title">📊 Month-wise Accepted Complaints</div><div class="chart-container"><canvas id="chartMonthAcc"></canvas></div></div>
         <div class="chart-card"><div class="chart-title">📉 Root Cause Pareto — Accepted</div><div class="chart-container"><canvas id="chartParetoAcc"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">📊 Size-wise Accepted Complaints</div><div class="chart-container"><canvas id="chartSizeAcc"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">🥧 Channel-wise Accepted Complaints</div><div class="chart-container"><canvas id="chartChannelAcc"></canvas></div></div>
+        <div class="chart-card">
+          <div class="chart-title">📊 Root Cause — Month-wise (Accepted)</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthAcc" class="filter-select" onchange="refreshRCMonthFiltered('acc')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartRCMonthAcc"></canvas></div>
+          <div id="rcMonthAccEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
         <div class="chart-card action-chart-card"><div class="chart-title">🎯 Action Plan Analysis — Accepted</div><div class="chart-container"><canvas id="chartActionAcc"></canvas></div></div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">🔠 Code-wise Root Cause Analysis — Accepted</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeAcc','code_wise_root_cause_accepted.csv')">⬇ CSV</button></div><div id="matrixCodeAcc"></div></div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">📐 Size-wise Root Cause Analysis — Accepted</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeAcc','size_wise_root_cause_accepted.csv')">⬇ CSV</button></div><div id="matrixSizeAcc"></div></div>
       </div>
     </div>
 
@@ -212,7 +309,26 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
       <div class="charts-grid">
         <div class="chart-card"><div class="chart-title">📊 Month-wise Rejected Complaints</div><div class="chart-container"><canvas id="chartMonthRej"></canvas></div></div>
         <div class="chart-card"><div class="chart-title">📉 Root Cause Pareto — Rejected</div><div class="chart-container"><canvas id="chartParetoRej"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">📊 Size-wise Rejected Complaints</div><div class="chart-container"><canvas id="chartSizeRej"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">🥧 Channel-wise Rejected Complaints</div><div class="chart-container"><canvas id="chartChannelRej"></canvas></div></div>
+        <div class="chart-card">
+          <div class="chart-title">📊 Root Cause — Month-wise (Rejected)</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthRej" class="filter-select" onchange="refreshRCMonthFiltered('rej')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartRCMonthRej"></canvas></div>
+          <div id="rcMonthRejEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
         <div class="chart-card action-chart-card"><div class="chart-title">🎯 Action Plan Analysis — Rejected</div><div class="chart-container"><canvas id="chartActionRej"></canvas></div></div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">🔠 Code-wise Root Cause Analysis — Rejected</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodeRej','code_wise_root_cause_rejected.csv')">⬇ CSV</button></div><div id="matrixCodeRej"></div></div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">📐 Size-wise Root Cause Analysis — Rejected</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizeRej','size_wise_root_cause_rejected.csv')">⬇ CSV</button></div><div id="matrixSizeRej"></div></div>
       </div>
     </div>
 
@@ -221,8 +337,28 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
       <div class="charts-grid">
         <div class="chart-card"><div class="chart-title">📊 Month-wise Pending Complaints</div><div class="chart-container"><canvas id="chartMonthPen"></canvas></div></div>
         <div class="chart-card"><div class="chart-title">📉 Root Cause Pareto — Pending</div><div class="chart-container"><canvas id="chartParetoPen"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">📊 Size-wise Pending Complaints</div><div class="chart-container"><canvas id="chartSizePen"></canvas></div></div>
+        <div class="chart-card"><div class="chart-title">🥧 Channel-wise Pending Complaints</div><div class="chart-container"><canvas id="chartChannelPen"></canvas></div></div>
+        <div class="chart-card">
+          <div class="chart-title">📊 Root Cause — Month-wise (Pending)</div>
+          <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
+            <select id="filterRootCauseMonthPen" class="filter-select" onchange="refreshRCMonthFiltered('pen')">
+              <option value="">— Select Root Cause —</option>
+              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
+              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
+              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
+              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
+              <option>Surface defect</option><option>Size variation</option>
+            </select>
+          </div>
+          <div class="chart-container"><canvas id="chartRCMonthPen"></canvas></div>
+          <div id="rcMonthPenEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
+        </div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">🔠 Code-wise Root Cause Analysis — Pending</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixCodePen','code_wise_root_cause_pending.csv')">⬇ CSV</button></div><div id="matrixCodePen"></div></div>
+        <div class="chart-card matrix-card"><div class="matrix-title-row"><div class="chart-title">📐 Size-wise Root Cause Analysis — Pending</div><button class="mx-download-btn" onclick="downloadMatrixCSV('matrixSizePen','size_wise_root_cause_pending.csv')">⬇ CSV</button></div><div id="matrixSizePen"></div></div>
       </div>
     </div>
+
   </div>
 
   <div class="mob-section" id="mob-add">
@@ -266,6 +402,79 @@ tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#f0f5ff
 <script>
 const STORAGE_KEY='cca_records_v2_actionplan';
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SIZES=['500x500','600x600','800x800','600x1200','800x1200'];
+function normalizeSize(value){
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g,'')
+    .replace(/[×✕]/g,'x');
+}
+
+function getSizeCategories(recs){
+  const seen = [];
+  (recs || []).forEach(r => {
+    const v = normalizeSize(r.size);
+    if (v && !seen.includes(v)) seen.push(v);
+  });
+
+  // Keep the dashboard's standard sizes first, then include any other
+  // size values that actually exist in the Google Sheet.
+  const ordered = SIZES.filter(v => seen.includes(v));
+  seen.forEach(v => {
+    if (!ordered.includes(v)) ordered.push(v);
+  });
+
+  // Always show standard categories even when the sheet currently has no size data.
+  return ordered.length ? ordered : [...SIZES];
+}
+
+function sizeBarChart(canvasId, color){
+  const el = document.getElementById(canvasId);
+  if (!el) return null;
+
+  return new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: [...SIZES],
+      datasets: [{
+        label: 'Complaints',
+        data: new Array(SIZES.length).fill(0),
+        backgroundColor: color,
+        borderRadius: 5,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 20 } },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          color: '#1a1f2e',
+          font: { weight: '700', size: 11 },
+          formatter: v => v > 0 ? v : ''
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { autoSkip: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: gridColor },
+          ticks: { stepSize: 1, precision: 0 },
+          grace: '15%'
+        }
+      }
+    }
+  });
+}
+
 const CHANNELS=['FD','DB','FO','SH','OEM','PR'];
 const ACTION_PLANS=[
   'Discontinuation/Redevelopment of type',
@@ -568,42 +777,225 @@ function paretoChart(canvasId,color){
   return new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:color,borderRadius:5}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',formatter:v=>v?v:''}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
 }
+
+function stackedMonthChart(){
+  return new Chart(document.getElementById('chartMonthStacked'),{
+    type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'Accepted',data:new Array(12).fill(0),backgroundColor:COLORS.accepted,stack:'ms'},
+      {label:'Rejected',data:new Array(12).fill(0),backgroundColor:COLORS.rejected,stack:'ms'},
+      {label:'Pending',data:new Array(12).fill(0),backgroundColor:COLORS.pending,stack:'ms'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},datalabels:{color:'#fff',font:{weight:'700'},formatter:v=>v?v:''}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}}}
+  });
+}
+function doughnutChart(id,labels,colors){
+  return new Chart(document.getElementById(id),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:new Array(labels.length).fill(0),backgroundColor:colors,borderColor:'#fff',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},datalabels:{color:'#fff',font:{weight:'700'},formatter:(v,ctx)=>{const sum=ctx.dataset.data.reduce((a,b)=>a+b,0);return v&&sum?v+'\n'+((v/sum)*100).toFixed(1)+'%':''}}},cutout:'52%'}
+  });
+}
+function stackedSizeChart(){
+  const el = document.getElementById('chartSize');
+  if (!el) return null;
+
+  return new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: [...SIZES],
+      datasets: [
+        { label:'Accepted', data:new Array(SIZES.length).fill(0), backgroundColor:COLORS.accepted, stack:'sz' },
+        { label:'Rejected', data:new Array(SIZES.length).fill(0), backgroundColor:COLORS.rejected, stack:'sz' },
+        { label:'Pending',  data:new Array(SIZES.length).fill(0), backgroundColor:COLORS.pending,  stack:'sz' }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 20 } },
+      plugins: {
+        legend: { display:true, position:'top' },
+        tooltip: { mode:'index', intersect:false },
+        datalabels: {
+          color:'#fff',
+          font:{ weight:'700', size:11 },
+          anchor:'center',
+          align:'center',
+          formatter:v => v > 0 ? v : ''
+        }
+      },
+      scales: {
+        x: { stacked:true, grid:{ color:gridColor }, ticks:{ autoSkip:false } },
+        y: { stacked:true, beginAtZero:true, grid:{ color:gridColor }, ticks:{ stepSize:1, precision:0 } }
+      }
+    }
+  });
+}
 function buildCharts(){
   charts.month=simpleMonthChart('chartMonth',COLORS.accent);
-  charts.status=new Chart(document.getElementById('chartStatus'),{type:'doughnut',data:{labels:['Accepted','Rejected','Pending'],datasets:[{data:[0,0,0],backgroundColor:[COLORS.accepted,COLORS.rejected,COLORS.pending]}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},datalabels:{color:'#fff',font:{weight:'700'},formatter:(v,ctx)=>{const s=ctx.dataset.data.reduce((a,b)=>a+b,0);return v&&s?`${v}\n${((v/s)*100).toFixed(1)}%`:''}}},cutout:'55%'}});
+  charts.monthStacked=stackedMonthChart();
   charts.pareto=paretoChart('chartPareto',COLORS.accent2);
-  charts.channel=new Chart(document.getElementById('chartChannel'),{type:'doughnut',data:{labels:CHANNELS,datasets:[{data:new Array(CHANNELS.length).fill(0),backgroundColor:['#4f8ef7','#7c5af7','#22c55e','#f97316','#ef4444','#06b6d4']}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},datalabels:{color:'#fff',font:{weight:'700'},formatter:v=>v?v:''}},cutout:'50%'}});
+  charts.status=doughnutChart('chartStatus',['Accepted','Rejected','Pending'],[COLORS.accepted,COLORS.rejected,COLORS.pending]);
+  charts.size=stackedSizeChart();
+  charts.rcStatus=doughnutChart('chartRootCauseStatus',['Accepted','Rejected','Pending'],[COLORS.accepted,COLORS.rejected,COLORS.pending]);
+  charts.rcMonth=simpleMonthChart('chartRootCauseMonth',COLORS.accent);
+  charts.channel=doughnutChart('chartChannel',CHANNELS,['#4f8ef7','#7c5af7','#22c55e','#f97316','#ef4444','#06b6d4']);
   charts.action_all=actionChartConfig('chartActionAll','#1a5fd4');
+  document.getElementById('chartRootCauseStatus').style.display='none';
+  document.getElementById('chartRootCauseMonth').style.display='none';
 }
 function buildStatusCharts(key){
-  const suffix=key==='acc'?'Acc':key==='rej'?'Rej':'Pen',color=key==='acc'?COLORS.accepted:key==='rej'?COLORS.rejected:COLORS.pending;
-  charts['month_'+key]=simpleMonthChart('chartMonth'+suffix,color);charts['pareto_'+key]=paretoChart('chartPareto'+suffix,color);
-  if(key==='acc')charts.action_acc=actionChartConfig('chartActionAcc',COLORS.accepted);
-  if(key==='rej')charts.action_rej=actionChartConfig('chartActionRej',COLORS.rejected);
+  const suffix=key==='acc'?'Acc':key==='rej'?'Rej':'Pen';
+  const color=key==='acc'?COLORS.accepted:key==='rej'?COLORS.rejected:COLORS.pending;
+  charts['month_'+key]=simpleMonthChart('chartMonth'+suffix,color);
+  charts['pareto_'+key]=paretoChart('chartPareto'+suffix,color);
+  charts['size_'+key]=sizeBarChart('chartSize'+suffix,color);
+  charts['channel_'+key]=doughnutChart('chartChannel'+suffix,CHANNELS,['#4f8ef7','#7c5af7','#22c55e','#f97316','#ef4444','#06b6d4']);
+  charts['rcmonth_'+key]=simpleMonthChart('chartRCMonth'+suffix,color);
+  if(key==='acc') charts.action_acc=actionChartConfig('chartActionAcc',COLORS.accepted);
+  if(key==='rej') charts.action_rej=actionChartConfig('chartActionRej',COLORS.rejected);
+  document.getElementById('chartRCMonth'+suffix).style.display='none';
 }
 function refreshCharts(){
-  const counts=new Array(12).fill(0);records.forEach(r=>{const i=MONTHS.indexOf(r.month);if(i!==-1)counts[i]++});charts.month.data.datasets[0].data=counts;charts.month.update();
-  charts.status.data.datasets[0].data=[records.filter(r=>r.status==='Accepted').length,records.filter(r=>r.status==='Rejected').length,records.filter(r=>r.status==='Pending').length];charts.status.update();
-  refreshParetoFor(charts.pareto,records);
-  const cc=new Array(CHANNELS.length).fill(0);records.forEach(r=>{const i=CHANNELS.indexOf((r.channel||'').toUpperCase());if(i!==-1)cc[i]++});charts.channel.data.datasets[0].data=cc;charts.channel.update();
-  refreshActionCharts();
+  refreshMonthChart();refreshMonthStackedChart();refreshParetoFor(charts.pareto,records);
+  refreshStatusChart();refreshSizeChart();refreshRootCauseStatusChart();refreshRootCauseMonthChart();
+  refreshChannelChart();refreshActionCharts();refreshMatrices(null,'All');
   ['acc','rej','pen'].forEach(k=>{if(subtabBuilt[k])refreshStatusSubCharts(k)});
 }
-function refreshParetoFor(chart,recs){const c={};recs.forEach(r=>{if(r.rootCause)c[r.rootCause]=(c[r.rootCause]||0)+1});const s=Object.entries(c).sort((a,b)=>b[1]-a[1]);chart.data.labels=s.map(x=>x[0]);chart.data.datasets[0].data=s.map(x=>x[1]);chart.update()}
+function refreshMonthChart(){
+  const c=new Array(12).fill(0);records.forEach(r=>{const i=MONTHS.indexOf(r.month);if(i>=0)c[i]++});
+  charts.month.data.labels=MONTHS;charts.month.data.datasets[0].data=c;charts.month.update();
+}
+function refreshMonthStackedChart(){
+  const a=new Array(12).fill(0),r=new Array(12).fill(0),p=new Array(12).fill(0);
+  records.forEach(x=>{const i=MONTHS.indexOf(x.month);if(i<0)return;if(x.status==='Accepted')a[i]++;else if(x.status==='Rejected')r[i]++;else p[i]++});
+  [a,r,p].forEach((d,i)=>charts.monthStacked.data.datasets[i].data=d);charts.monthStacked.update();
+}
+function refreshParetoFor(chart,recs){
+  if(!chart)return;const c={};recs.forEach(r=>{if(r.rootCause)c[r.rootCause]=(c[r.rootCause]||0)+1});
+  const s=Object.entries(c).sort((a,b)=>b[1]-a[1]);chart.data.labels=s.map(x=>x[0]);chart.data.datasets[0].data=s.map(x=>x[1]);chart.update();
+}
+function refreshStatusChart(){
+  charts.status.data.datasets[0].data=[
+    records.filter(r=>r.status==='Accepted').length,
+    records.filter(r=>r.status==='Rejected').length,
+    records.filter(r=>r.status==='Pending').length
+  ];charts.status.update();
+}
+function refreshSizeChart(){
+  if (!charts.size) return;
+
+  const chosen = document.getElementById('filterSizeRootCause')?.value || '';
+  const src = chosen ? records.filter(r => r.rootCause === chosen) : records;
+  const categories = getSizeCategories(src);
+
+  const accepted = new Array(categories.length).fill(0);
+  const rejected = new Array(categories.length).fill(0);
+  const pending  = new Array(categories.length).fill(0);
+
+  src.forEach(r => {
+    const size = normalizeSize(r.size);
+    const idx = categories.indexOf(size);
+    if (idx === -1) return;
+
+    if (r.status === 'Accepted') accepted[idx]++;
+    else if (r.status === 'Rejected') rejected[idx]++;
+    else pending[idx]++;
+  });
+
+  charts.size.data.labels = categories;
+  charts.size.data.datasets[0].data = accepted;
+  charts.size.data.datasets[1].data = rejected;
+  charts.size.data.datasets[2].data = pending;
+  charts.size.update();
+
+  requestAnimationFrame(() => charts.size && charts.size.resize());
+}
+function refreshRootCauseStatusChart(){
+  const chosen=document.getElementById('filterRootCauseStatus')?.value||'',can=document.getElementById('chartRootCauseStatus'),empty=document.getElementById('rcStatusEmpty');
+  if(!chosen){can.style.display='none';empty.style.display='block';return}
+  const f=records.filter(r=>r.rootCause===chosen);
+  charts.rcStatus.data.datasets[0].data=[f.filter(r=>r.status==='Accepted').length,f.filter(r=>r.status==='Rejected').length,f.filter(r=>r.status==='Pending').length];
+  can.style.display='block';empty.style.display='none';charts.rcStatus.update();
+}
+function refreshRootCauseMonthChart(){
+  const chosen=document.getElementById('filterRootCauseMonth')?.value||'',can=document.getElementById('chartRootCauseMonth'),empty=document.getElementById('rcMonthEmpty');
+  if(!chosen){can.style.display='none';empty.style.display='block';return}
+  const c=new Array(12).fill(0);records.filter(r=>r.rootCause===chosen).forEach(r=>{const i=MONTHS.indexOf(r.month);if(i>=0)c[i]++});
+  charts.rcMonth.data.labels=MONTHS;charts.rcMonth.data.datasets[0].data=c;can.style.display='block';empty.style.display='none';charts.rcMonth.update();
+}
+function refreshChannelChart(){
+  const c=new Array(CHANNELS.length).fill(0);records.forEach(r=>{const i=CHANNELS.indexOf((r.channel||'').toUpperCase());if(i>=0)c[i]++});
+  charts.channel.data.datasets[0].data=c;charts.channel.update();
+}
 function refreshActionChart(chart,recs){
-  if(!chart)return;const c={};recs.forEach(r=>{if(r.actionPlan)c[r.actionPlan]=(c[r.actionPlan]||0)+1});const s=Object.entries(c).sort((a,b)=>b[1]-a[1]);
-  chart.data.labels=s.map(x=>x[0]);chart.data.datasets[0].data=s.map(x=>x[1]);chart.update();
+  if(!chart)return;const c={};recs.forEach(r=>{if(r.actionPlan)c[r.actionPlan]=(c[r.actionPlan]||0)+1});
+  const s=Object.entries(c).sort((a,b)=>b[1]-a[1]);chart.data.labels=s.map(x=>x[0]);chart.data.datasets[0].data=s.map(x=>x[1]);chart.update();
 }
 function refreshActionCharts(){
   refreshActionChart(charts.action_all,records.filter(r=>r.status==='Accepted'||r.status==='Rejected'));
   refreshActionChart(charts.action_acc,records.filter(r=>r.status==='Accepted'));
   refreshActionChart(charts.action_rej,records.filter(r=>r.status==='Rejected'));
 }
+const matrixDataCache={};
+function buildMatrixHTML(containerId,recs,rowKey,rowLabel){
+  const container=document.getElementById(containerId);if(!container)return;
+  if(!recs.length){container.innerHTML='<div class="chart-empty">No data available for this matrix.</div>';matrixDataCache[containerId]=null;return}
+  const rowTotals={},colTotals={},matrix={};
+  recs.forEach(r=>{const rv=(r[rowKey]||'').toString().trim(),cv=(r.rootCause||'').toString().trim();if(!rv||!cv)return;matrix[rv]=matrix[rv]||{};matrix[rv][cv]=(matrix[rv][cv]||0)+1;rowTotals[rv]=(rowTotals[rv]||0)+1;colTotals[cv]=(colTotals[cv]||0)+1});
+  const rows=Object.keys(rowTotals).sort((a,b)=>rowTotals[b]-rowTotals[a]),cols=Object.keys(colTotals).sort((a,b)=>colTotals[b]-colTotals[a]);
+  if(!rows.length||!cols.length){container.innerHTML='<div class="chart-empty">No data available for this matrix.</div>';return}
+  matrixDataCache[containerId]={rows,cols,matrix,rowTotals,colTotals,rowLabel};
+  let maxVal=0;rows.forEach(r=>cols.forEach(c=>maxVal=Math.max(maxVal,(matrix[r]&&matrix[r][c])||0)));
+  let html='<div class="matrix-wrap"><table class="matrix-table"><thead><tr><th>'+rowLabel+'</th>';
+  cols.forEach(c=>html+='<th>'+c+'</th>');html+='<th class="mx-total">Total</th></tr></thead><tbody>';
+  rows.forEach(r=>{html+='<tr><td>'+r+'</td>';cols.forEach(c=>{const v=(matrix[r]&&matrix[r][c])||0;if(v){const ratio=maxVal?v/maxVal:0,bg='rgba(26,95,212,'+(0.10+ratio*0.62).toFixed(2)+')',fg=ratio>.55?'#fff':'#1a1f2e';html+='<td style="background:'+bg+';color:'+fg+';font-weight:'+(ratio>.3?700:500)+'">'+v+'</td>'}else html+='<td><span class="mx-empty-cell">–</span></td>'});html+='<td class="mx-total">'+rowTotals[r]+'</td></tr>'});
+  html+='<tr><td class="mx-total">Total</td>';cols.forEach(c=>html+='<td class="mx-total">'+colTotals[c]+'</td>');html+='<td class="mx-total">'+Object.values(rowTotals).reduce((a,b)=>a+b,0)+'</td></tr></tbody></table></div><div class="mx-mobile-hint">↔ Swipe to see more root causes</div>';
+  container.innerHTML=html;
+}
+function refreshMatrices(statusFilter,suffix){
+  const filtered=statusFilter?records.filter(r=>r.status===statusFilter):records;
+  buildMatrixHTML('matrixCode'+suffix,filtered,'code','Code');buildMatrixHTML('matrixSize'+suffix,filtered,'size','Size');
+}
+function downloadMatrixCSV(containerId,filename){
+  const d=matrixDataCache[containerId];if(!d){showToast('No data to export for this matrix.','#f97316');return}
+  const {rows,cols,matrix,rowTotals,colTotals,rowLabel}=d,esc=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const lines=[[rowLabel,...cols,'Total'].map(esc).join(',')];
+  rows.forEach(r=>lines.push([esc(r),...cols.map(c=>(matrix[r]&&matrix[r][c])||0),rowTotals[r]].join(',')));
+  lines.push([esc('Total'),...cols.map(c=>colTotals[c]),Object.values(rowTotals).reduce((a,b)=>a+b,0)].join(','));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+}
 function refreshStatusSubCharts(key){
-  const status=key==='acc'?'Accepted':key==='rej'?'Rejected':'Pending',recs=records.filter(r=>r.status===status),mc=new Array(12).fill(0);
-  recs.forEach(r=>{const i=MONTHS.indexOf(r.month);if(i!==-1)mc[i]++});charts['month_'+key].data.datasets[0].data=mc;charts['month_'+key].update();refreshParetoFor(charts['pareto_'+key],recs);refreshActionCharts();
+  const status=key==='acc'?'Accepted':key==='rej'?'Rejected':'Pending',suffix=key==='acc'?'Acc':key==='rej'?'Rej':'Pen',recs=records.filter(r=>r.status===status);
+  const m=new Array(12).fill(0),ch=new Array(CHANNELS.length).fill(0);
+  const sizeCategories=getSizeCategories(recs);
+  const sz=new Array(sizeCategories.length).fill(0);
+
+  recs.forEach(r=>{
+    let i=MONTHS.indexOf(r.month);if(i>=0)m[i]++;
+    i=sizeCategories.indexOf(normalizeSize(r.size));if(i>=0)sz[i]++;
+    i=CHANNELS.indexOf((r.channel||'').toUpperCase());if(i>=0)ch[i]++;
+  });
+
+  charts['month_'+key].data.labels=MONTHS;charts['month_'+key].data.datasets[0].data=m;charts['month_'+key].update();
+  refreshParetoFor(charts['pareto_'+key],recs);
+
+  if(charts['size_'+key]){
+    charts['size_'+key].data.labels=sizeCategories;
+    charts['size_'+key].data.datasets[0].data=sz;
+    charts['size_'+key].update();
+    requestAnimationFrame(()=>charts['size_'+key]&&charts['size_'+key].resize());
+  }
+  charts['channel_'+key].data.datasets[0].data=ch;charts['channel_'+key].update();
+  refreshMatrices(status,suffix);refreshActionCharts();
+}
+function refreshRCMonthFiltered(key){
+  const suffix=key==='acc'?'Acc':key==='rej'?'Rej':'Pen',status=key==='acc'?'Accepted':key==='rej'?'Rejected':'Pending';
+  const chosen=document.getElementById('filterRootCauseMonth'+suffix)?.value||'',can=document.getElementById('chartRCMonth'+suffix),empty=document.getElementById('rcMonth'+suffix+'Empty');
+  if(!chosen){can.style.display='none';empty.style.display='block';return}
+  const c=new Array(12).fill(0);records.filter(r=>r.status===status&&r.rootCause===chosen).forEach(r=>{const i=MONTHS.indexOf(r.month);if(i>=0)c[i]++});
+  charts['rcmonth_'+key].data.labels=MONTHS;charts['rcmonth_'+key].data.datasets[0].data=c;can.style.display='block';empty.style.display='none';charts['rcmonth_'+key].update();
 }
 function exportCSV(){
   if(!records.length){showToast('No data to export.','#f97316');return}
