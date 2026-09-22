@@ -218,14 +218,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">📊 Size-wise Complaint Analysis by Status</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()">
-              <option value="">All Root Causes</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterSizeRootCause" class="filter-select" onchange="refreshSizeChart()"><option value="">All Root Causes</option></select>
           </div>
           <div class="chart-container"><canvas id="chartSize"></canvas></div>
         </div>
@@ -233,14 +226,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">🥧 Root Cause — Status Analysis</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()">
-              <option value="">— Select Root Cause —</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterRootCauseStatus" class="filter-select" onchange="refreshRootCauseStatusChart()"><option value="">— Select Root Cause —</option></select>
           </div>
           <div class="chart-container"><canvas id="chartRootCauseStatus"></canvas></div>
           <div id="rcStatusEmpty" class="chart-empty">Select a root cause to view its status breakdown.</div>
@@ -249,14 +235,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">📊 Root Cause — Month-wise Analysis</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()">
-              <option value="">— Select Root Cause —</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterRootCauseMonth" class="filter-select" onchange="refreshRootCauseMonthChart()"><option value="">— Select Root Cause —</option></select>
           </div>
           <div class="chart-container"><canvas id="chartRootCauseMonth"></canvas></div>
           <div id="rcMonthEmpty" class="chart-empty">Select a root cause to view its month-wise complaint trend.</div>
@@ -286,14 +265,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">📊 Root Cause — Month-wise (Accepted)</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterRootCauseMonthAcc" class="filter-select" onchange="refreshRCMonthFiltered('acc')">
-              <option value="">— Select Root Cause —</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterRootCauseMonthAcc" class="filter-select" onchange="refreshRCMonthFiltered('acc')"><option value="">— Select Root Cause —</option></select>
           </div>
           <div class="chart-container"><canvas id="chartRCMonthAcc"></canvas></div>
           <div id="rcMonthAccEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
@@ -314,14 +286,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">📊 Root Cause — Month-wise (Rejected)</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterRootCauseMonthRej" class="filter-select" onchange="refreshRCMonthFiltered('rej')">
-              <option value="">— Select Root Cause —</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterRootCauseMonthRej" class="filter-select" onchange="refreshRCMonthFiltered('rej')"><option value="">— Select Root Cause —</option></select>
           </div>
           <div class="chart-container"><canvas id="chartRCMonthRej"></canvas></div>
           <div id="rcMonthRejEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
@@ -342,14 +307,7 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="chart-card">
           <div class="chart-title">📊 Root Cause — Month-wise (Pending)</div>
           <div class="chart-filter-row"><label class="filter-label">Root Cause:</label>
-            <select id="filterRootCauseMonthPen" class="filter-select" onchange="refreshRCMonthFiltered('pen')">
-              <option value="">— Select Root Cause —</option>
-              <option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option>
-              <option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option>
-              <option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option>
-              <option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option>
-              <option>Surface defect</option><option>Size variation</option>
-            </select>
+            <select id="filterRootCauseMonthPen" class="filter-select" onchange="refreshRCMonthFiltered('pen')"><option value="">— Select Root Cause —</option></select>
           </div>
           <div class="chart-container"><canvas id="chartRCMonthPen"></canvas></div>
           <div id="rcMonthPenEmpty" class="chart-empty">Select a root cause to view its month-wise trend.</div>
@@ -374,7 +332,14 @@ table.matrix-table .mx-empty-cell{color:#c7cede}
         <div class="field"><label>Location</label><input type="text" id="fLocation" placeholder="e.g. Colombo"/></div>
         <div class="field"><label>Channel</label><select id="fChannel"><option value="">— Select —</option><option>FD</option><option>DB</option><option>FO</option><option>SH</option><option>OEM</option><option>PR</option></select></div>
         <div class="field"><label>Sales Location</label><input type="text" id="fSalesLocation" placeholder="e.g. Colombo"/></div>
-        <div class="field"><label>Root Cause</label><select id="fRootCause"><option value="">— Select —</option><option>Colour Variation</option><option>Lot, shade, type mixing</option><option>Position variation</option><option>Staining (polished)</option><option>Dirtiness (High rough)</option><option>Water mark</option><option>Cutting issue (80x120)</option><option>Flatness</option><option>Scratch marks</option><option>Cracked tiles</option><option>Chamfering issue</option><option>Others</option><option>Surface defect</option><option>Size variation</option></select></div>
+        <div class="field"><label>Root Cause</label><select id="fRootCause"><option value="">— Select Root Cause —</option></select>
+          <button class="btn btn-secondary" type="button" onclick="toggleNewRootCause()" style="padding:6px 10px;font-size:11px;margin-top:5px">+ Add New Root Cause</button>
+          <div id="newRootCauseBox" hidden style="margin-top:7px">
+            <input id="newRootCauseName" type="text" maxlength="200" placeholder="Enter new root cause" aria-label="New root cause name" />
+            <button id="saveRootCauseBtn" class="btn btn-primary" type="button" onclick="saveNewRootCause()" style="padding:7px 12px;margin-top:6px">Save to Google Sheet</button>
+            <div id="rootCauseFeedback" style="font-size:11px;margin-top:5px;color:var(--muted)" role="status"></div>
+          </div>
+        </div>
         <div class="field"><label>Status</label><select id="fStatus"><option value="">— Select —</option><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
       </div>
       <div class="btn-row">
@@ -476,6 +441,68 @@ function sizeBarChart(canvasId, color){
 }
 
 const CHANNELS=['FD','DB','FO','SH','OEM','PR'];
+
+const DEFAULT_ROOT_CAUSES = ['Colour Variation', 'Lot, shade, type mixing', 'Position variation', 'Staining (polished)', 'Dirtiness (High rough)', 'Water mark', 'Cutting issue (80x120)', 'Flatness', 'Scratch marks', 'Cracked tiles', 'Chamfering issue', 'Others', 'Surface defect', 'Size variation', 'Slippery tiles'];
+let rootCauses = [...DEFAULT_ROOT_CAUSES];
+const ROOT_CAUSE_SELECTS = ['fRootCause','filterSizeRootCause','filterRootCauseStatus','filterRootCauseMonth','filterRootCauseMonthAcc','filterRootCauseMonthRej','filterRootCauseMonthPen'];
+function updateRootCauseDropdowns(names){
+  rootCauses = [...new Set((names || []).map(v => String(v || '').trim()).filter(Boolean))];
+  ROOT_CAUSE_SELECTS.forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const previous = select.value;
+    const first = select.options[0] ? select.options[0].textContent : '— Select Root Cause —';
+    select.replaceChildren(new Option(first,''));
+    rootCauses.forEach(name => select.add(new Option(name,name)));
+    // Do not silently discard a currently selected historical root cause.
+    if(previous && !rootCauses.includes(previous)) select.add(new Option(previous+' (existing record)', previous));
+    select.value = previous || '';
+  });
+}
+function toggleNewRootCause(){
+  const box=document.getElementById('newRootCauseBox');
+  box.hidden=!box.hidden;
+  if(!box.hidden)document.getElementById('newRootCauseName').focus();
+}
+async function loadRootCausesFromSheets(){
+  const response=await fetch(SHEETS_URL+'?action=getRootCauses&t='+Date.now(),{cache:'no-store'});
+  const data=await response.json();
+  if(!data.success || !Array.isArray(data.rootCauses)) throw new Error(data.error||'Could not load Root Causes');
+  updateRootCauseDropdowns(data.rootCauses);
+  return data.rootCauses;
+}
+async function saveNewRootCause(){
+  const name=document.getElementById('newRootCauseName').value.trim();
+  const feedback=document.getElementById('rootCauseFeedback');
+  const btn=document.getElementById('saveRootCauseBtn');
+  if(!name){feedback.textContent='Enter a root cause name.';return;}
+  if(rootCauses.some(v=>v.toLowerCase()===name.toLowerCase())){
+    feedback.textContent='This root cause already exists.';
+    document.getElementById('fRootCause').value=rootCauses.find(v=>v.toLowerCase()===name.toLowerCase());
+    return;
+  }
+  btn.disabled=true;feedback.textContent='Saving to Google Sheet…';
+  try{
+    await fetch(SHEETS_URL,{
+      method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'addRootCause',rootCause:name})
+    });
+    // no-cors does not expose POST results: confirm the actual Sheet value via GET.
+    let saved=false;
+    for(let attempt=0;attempt<3;attempt++){
+      const names=await loadRootCausesFromSheets();
+      if(names.some(v=>v.toLowerCase()===name.toLowerCase())){saved=true;break;}
+      await new Promise(resolve=>setTimeout(resolve,600));
+    }
+    if(!saved)throw new Error('The new name could not be confirmed in Google Sheets. Check the Apps Script deployment.');
+    document.getElementById('fRootCause').value=rootCauses.find(v=>v.toLowerCase()===name.toLowerCase());
+    document.getElementById('newRootCauseName').value='';
+    feedback.textContent='Saved to the Root Causes sheet.';
+    showToast('✅ New Root Cause saved to Google Sheets!');
+  }catch(err){feedback.textContent=err.message;showToast('❌ Root Cause was not confirmed in Sheets.','#dc2626')}
+  finally{btn.disabled=false;}
+}
+
 const ACTION_PLANS=[
   'Discontinuation/Redevelopment of type',
   'Sorting team to be trained',
@@ -532,10 +559,11 @@ function saveToStorage(){localStorage.setItem(STORAGE_KEY,JSON.stringify({record
 function loadFromStorage(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return;const p=JSON.parse(raw);records=p.records||[];nextId=p.nextId||records.length+1}catch(e){records=[]}}
 
 window.addEventListener('DOMContentLoaded',async()=>{
-  initDatePicker();buildCharts();setSheetStatus('syncing','⏳ Loading latest data from Google Sheets…');
+  updateRootCauseDropdowns(rootCauses);initDatePicker();buildCharts();setSheetStatus('syncing','⏳ Loading latest data from Google Sheets…');
   try{
     const res=await fetch(SHEETS_URL+'?action=getAll');const data=await res.json();
     if(!data.success)throw new Error(data.error||'Failed response');
+    if(Array.isArray(data.rootCauses))updateRootCauseDropdowns(data.rootCauses);
     records=(data.records||[]).map((r,i)=>({
       id:Date.now()+i,complaintNo:r.complaintNo||(i+1),month:r.month||'',code:r.code||'',grade:r.grade||'',size:r.size||'',lot:r.lot||'',
       location:r.location||'',channel:r.channel||'',salesLoc:r.salesLoc||'',rootCause:r.rootCause||'',status:r.status||'Pending',
@@ -573,7 +601,7 @@ async function syncAllToSheets(){
 async function loadFromSheets(){
   setSheetStatus('syncing','⏳ Loading from Google Sheets…');
   try{
-    const res=await fetch(SHEETS_URL+'?action=getAll'),data=await res.json();if(!data.success)throw new Error(data.error||'Unknown error');
+    const res=await fetch(SHEETS_URL+'?action=getAll'),data=await res.json();if(!data.success)throw new Error(data.error||'Unknown error');if(Array.isArray(data.rootCauses))updateRootCauseDropdowns(data.rootCauses);
     records=(data.records||[]).map((r,i)=>({id:Date.now()+i,complaintNo:r.complaintNo||(i+1),month:r.month||'',code:r.code||'',grade:r.grade||'',size:r.size||'',lot:r.lot||'',location:r.location||'',channel:r.channel||'',salesLoc:r.salesLoc||'',rootCause:r.rootCause||'',status:r.status||'Pending',timestamp:r.timestamp||'',actionPlan:r.actionPlan||''}));
     nextId=records.reduce((m,r)=>Math.max(m,Number(r.complaintNo)||0),0)+1;saveToStorage();renderTable();refreshCharts();updateStatCards();resetForm();
     setSheetStatus('connected',`✅ Loaded ${records.length} records from Google Sheets`);showToast(`⬇ ${records.length} records loaded`);
