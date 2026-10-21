@@ -58,7 +58,7 @@ main{max-width:1400px;margin:0 auto;padding:28px 24px 60px}
 .mob-section{display:none}.mob-section.mob-active{display:block}
 .charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:28px}
 .chart-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:18px}
-.chart-container{position:relative;height:280px}
+.chart-container{position:relative;height:280px;width:100%}
 .action-chart-card{grid-column:1/-1}
 .action-chart-card .chart-container{height:420px}
 .sheets-banner{
@@ -788,7 +788,28 @@ function renderTable(){
     </table>`;
 }
 
-Chart.defaults.color='#5a6480';Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=12;Chart.register(ChartDataLabels);
+Chart.defaults.color='#46516a';Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=12;
+Chart.defaults.devicePixelRatio=Math.max(2,window.devicePixelRatio||1);
+Chart.defaults.animation=false;
+Chart.register(ChartDataLabels);
+// Display totals above stacked bars, including where the top status dataset is zero.
+const stackedTotalsPlugin={
+  id:'stackedTotals',
+  afterDatasetsDraw(chart,args,options){
+    if(!options.enabled)return;
+    const {ctx,scales:{x,y}}=chart;
+    ctx.save();ctx.fillStyle='#243047';ctx.font="700 12px 'DM Sans', sans-serif";
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    chart.data.labels.forEach((label,i)=>{
+      const total=chart.data.datasets.reduce((sum,ds,j)=>chart.isDatasetVisible(j)?sum+(Number(ds.data[i])||0):sum,0);
+      if(!total)return;
+      const px=x.getPixelForValue(i),py=y.getPixelForValue(total)-7;
+      if(py>=12)ctx.fillText(String(total),px,py);
+    });
+    ctx.restore();
+  }
+};
+Chart.register(stackedTotalsPlugin);
 const gridColor='rgba(0,0,0,.07)';
 function actionChartConfig(canvasId,color){
   return new Chart(document.getElementById(canvasId),{
@@ -799,11 +820,11 @@ function actionChartConfig(canvasId,color){
 }
 function simpleMonthChart(canvasId,color){
   return new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:MONTHS,datasets:[{data:new Array(12).fill(0),backgroundColor:color,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',formatter:v=>v?v:''}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',offset:5,clip:false,formatter:v=>v?v:'',color:'#46516a',font:{weight:'600',size:12}}},scales:{y:{beginAtZero:true,grace:'15%',ticks:{stepSize:1,precision:0}}}}});
 }
 function paretoChart(canvasId,color){
   return new Chart(document.getElementById(canvasId),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:color,borderRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',formatter:v=>v?v:''}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',offset:5,clip:false,formatter:v=>v?v:'',color:'#46516a',font:{weight:'600',size:12}}},scales:{y:{beginAtZero:true,grace:'15%',ticks:{stepSize:1,precision:0}}}}});
 }
 
 function stackedMonthChart(){
@@ -814,7 +835,7 @@ function stackedMonthChart(){
       {label:'Rejected',data:new Array(12).fill(0),backgroundColor:COLORS.rejected,stack:'ms'},
       {label:'Pending',data:new Array(12).fill(0),backgroundColor:COLORS.pending,stack:'ms'}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},datalabels:{color:'#fff',font:{weight:'700'},formatter:v=>v?v:''}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}}}
+    options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:24}},plugins:{legend:{position:'top'},stackedTotals:{enabled:true},datalabels:{color:'#fff',font:{weight:'700',size:12},formatter:v=>v?v:''}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,grace:'16%',ticks:{stepSize:1,precision:0}}}}
   });
 }
 function doughnutChart(id,labels,colors){
@@ -841,9 +862,10 @@ function stackedSizeChart(){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 20 } },
+      layout: { padding: { top: 24 } },
       plugins: {
         legend: { display:true, position:'top' },
+        stackedTotals: { enabled:true },
         tooltip: { mode:'index', intersect:false },
         datalabels: {
           color:'#fff',
@@ -855,7 +877,7 @@ function stackedSizeChart(){
       },
       scales: {
         x: { stacked:true, grid:{ color:gridColor }, ticks:{ autoSkip:false } },
-        y: { stacked:true, beginAtZero:true, grid:{ color:gridColor }, ticks:{ stepSize:1, precision:0 } }
+        y: { stacked:true, beginAtZero:true, grace:'16%', grid:{ color:gridColor }, ticks:{ stepSize:1, precision:0 } }
       }
     }
   });
@@ -932,10 +954,14 @@ function refreshSizeChart(){
     else pending[idx]++;
   });
 
-  charts.size.data.labels = categories;
-  charts.size.data.datasets[0].data = accepted;
-  charts.size.data.datasets[1].data = rejected;
-  charts.size.data.datasets[2].data = pending;
+  const ordered = categories.map((size,i)=>({
+    size,accepted:accepted[i],rejected:rejected[i],pending:pending[i],
+    total:accepted[i]+rejected[i]+pending[i]
+  })).sort((a,b)=>b.total-a.total || a.size.localeCompare(b.size,undefined,{numeric:true}));
+  charts.size.data.labels = ordered.map(row=>row.size);
+  charts.size.data.datasets[0].data = ordered.map(row=>row.accepted);
+  charts.size.data.datasets[1].data = ordered.map(row=>row.rejected);
+  charts.size.data.datasets[2].data = ordered.map(row=>row.pending);
   charts.size.update();
 
   requestAnimationFrame(() => charts.size && charts.size.resize());
